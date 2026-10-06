@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Produto extends Model
 {
@@ -30,7 +31,11 @@ class Produto extends Model
         ];
     }
 
-    /** Normal | Baixo | Crítico | Sem estoque, com as mesmas regras do protótipo. */
+    public function movimentacoes(): HasMany
+    {
+        return $this->hasMany(Movimentacao::class)->latest('id');
+    }
+    
     public function situacaoEstoque(): string
     {
         $saldo = (float) $this->saldo;
