@@ -13,7 +13,7 @@ class ExampleTest extends TestCase
 
     public function test_pagina_inicial_redireciona_para_produtos(): void
     {
-        $this->get('/')->assertRedirect('/produtos');
+        $this->get('/')->assertRedirect('/dashboard');
     }
 
     public function test_listagem_de_produtos_carrega_com_dados_do_banco(): void

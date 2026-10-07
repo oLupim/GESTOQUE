@@ -11,6 +11,11 @@ use Inertia\Inertia;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\MotocicletaController;
 use App\Http\Controllers\OrdemServicoController;
+use App\Http\Controllers\DashboardController;
+
+
+
+
 
 // Pública: clientes veem as peças disponíveis sem login.
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
@@ -24,7 +29,8 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
    Route::middleware('auth')->group(function () {
        Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-        Route::redirect('/', '/produtos');
+        Route::redirect('/', '/dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/produtos', [ProdutoController::class, 'index'])->name('produtos.index');
 

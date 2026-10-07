@@ -25,7 +25,7 @@ class LoginTest extends TestCase
     {
         $u = User::factory()->create(['password' => 'segredo123']);
 
-        $this->post('/login', ['email' => $u->email, 'password' => 'segredo123'])->assertRedirect('/produtos');
+        $this->post('/login', ['email' => $u->email, 'password' => 'segredo123'])->assertRedirect('/dashboard');
         $this->assertAuthenticatedAs($u);
     }
 

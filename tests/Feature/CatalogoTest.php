@@ -19,20 +19,21 @@ class CatalogoTest extends TestCase
         $this->withoutVite();
         $estoque = app(EstoqueService::class);
 
-        $disponivel = Produto::factory()->create(['nome' => 'Óleo', 'estoque_minimo' => 2]);
+        // Mesma categoria e nomes sem acento: a ordem do catálogo fica previsível.
+        $disponivel = Produto::factory()->create(['nome' => 'Filtro', 'categoria' => 'Peças', 'estoque_minimo' => 2]);
         $estoque->entrar($disponivel, 10);
 
-        $poucas = Produto::factory()->create(['nome' => 'Vela', 'estoque_minimo' => 5]);
+        $poucas = Produto::factory()->create(['nome' => 'Vela', 'categoria' => 'Peças', 'estoque_minimo' => 5]);
         $estoque->entrar($poucas, 3);
 
-        Produto::factory()->create(['nome' => 'Zerado']);                     // sem estoque
-        $inativo = Produto::factory()->create(['nome' => 'Inativo', 'ativo' => false]);
+        Produto::factory()->create(['nome' => 'Zerado', 'categoria' => 'Peças']);                    // sem estoque
+        $inativo = Produto::factory()->create(['nome' => 'Inativo', 'categoria' => 'Peças', 'ativo' => false]);
         $estoque->entrar($inativo, 5);
 
         $this->get('/catalogo')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->component('Catalogo', false)
             ->has('produtos', 2)
-            ->where('produtos.0.nome', 'Óleo')
+            ->where('produtos.0.nome', 'Filtro')
             ->where('produtos.0.ultimas', false)
             ->where('produtos.1.nome', 'Vela')
             ->where('produtos.1.ultimas', true));
