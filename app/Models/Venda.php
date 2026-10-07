@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Venda extends Model
 {
@@ -49,5 +50,10 @@ class Venda extends Model
     public function estaCancelada(): bool
     {
         return $this->status === self::CANCELADA;
+    }
+
+    public function nfce(): HasOne
+    {
+        return $this->hasOne(DocumentoFiscal::class)->where('modelo', DocumentoFiscal::NFCE);
     }
 }

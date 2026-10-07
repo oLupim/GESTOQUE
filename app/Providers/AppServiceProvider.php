@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use App\Models\Entrada;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Models\Venda;
+use App\Fiscal\BrasilNfeEmissor;
+use App\Fiscal\EmissorFiscal;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(EmissorFiscal::class, BrasilNfeEmissor::class);
     }
 
     /**
