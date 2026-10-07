@@ -54,4 +54,18 @@ class Movimentacao extends Model
     {
         return $this->hasOne(self::class, 'estorno_de_id');
     }
+
+    public function descricaoOrigem(): string
+    {
+        if ($this->estorno_de_id) {
+            return 'Estorno da mov. #'.$this->estorno_de_id;
+        }
+
+        return match ($this->origem_type) {
+            'entrada' => 'Entrada #'.$this->origem_id,
+            'venda' => 'Venda #'.$this->origem_id,
+            'ordem_servico' => 'Serviço #'.$this->origem_id,
+            default => $this->tipo->label(),
+        };
+    }
 }

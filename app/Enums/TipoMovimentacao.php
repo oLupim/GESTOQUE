@@ -46,4 +46,10 @@ enum TipoMovimentacao: string
     {
         return in_array($this, [self::Perda, self::AjustePositivo, self::AjusteNegativo, self::Estorno], true);
     }
+
+    /** Tipos que o usuário pode lançar pela tela "Nova movimentação". */
+    public static function manuais(): array
+    {
+        return [self::Entrada, self::Devolucao, self::Perda, self::AjustePositivo, self::AjusteNegativo];
+    }
 }
