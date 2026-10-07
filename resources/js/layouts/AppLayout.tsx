@@ -49,7 +49,7 @@ export default function AppLayout({ title, children }: { title: string; children
                 <Wrench size={12} /> Serviço
               </Link>
               <Link
-                href="/vendas"
+                href="/vendas/nova"
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-white transition-fast text-xs font-medium bg-red hover:bg-red-dark"
               >
                 <Plus size={12} /> Venda
@@ -83,7 +83,7 @@ export default function AppLayout({ title, children }: { title: string; children
             </button>
           </div>
         )}
-        
+
       </div>
     </>
   );

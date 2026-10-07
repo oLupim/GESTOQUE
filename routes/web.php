@@ -22,4 +22,9 @@ Route::get('/entradas', [EntradaController::class, 'index'])->name('entradas.ind
 Route::post('/entradas', [EntradaController::class, 'store'])->name('entradas.store');
 
 Route::post('/vendas', [VendaController::class, 'store'])->name('vendas.store');
+
 Route::post('/vendas/{venda}/cancelar', [VendaController::class, 'cancelar'])->name('vendas.cancelar');
+
+Route::get('/vendas', [VendaController::class, 'index'])->name('vendas.index');
+
+Route::get('/vendas/nova', [VendaController::class, 'create'])->name('vendas.create');
