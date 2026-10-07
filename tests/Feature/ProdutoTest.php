@@ -62,4 +62,15 @@ class ProdutoTest extends TestCase
 
         $this->assertSame(1, Produto::count());
     }
+
+
+    public function test_custo_e_minimo_vazios_assumem_zero(): void
+    {
+        $this->post('/produtos', $this->dados(['preco_custo' => '', 'estoque_minimo' => '']))
+            ->assertRedirect('/produtos');
+
+        $produto = Produto::firstOrFail();
+        $this->assertEquals(0, (float) $produto->preco_custo);
+        $this->assertEquals(0, (float) $produto->estoque_minimo);
+    }
 }

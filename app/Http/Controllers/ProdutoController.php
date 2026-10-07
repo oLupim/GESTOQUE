@@ -40,6 +40,8 @@ class ProdutoController extends Controller
         $dados = $request->validated();
         $inicial = (float) ($dados['estoque_inicial'] ?? 0);
         unset($dados['estoque_inicial']);
+        $dados['preco_custo'] ??= 0;
+        $dados['estoque_minimo'] ??= 0;
 
         // Produto e estoque inicial na mesma transação: ou grava os dois, ou nenhum.
         $produto = DB::transaction(function () use ($dados, $inicial, $estoque) {
