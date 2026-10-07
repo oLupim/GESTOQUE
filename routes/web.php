@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\EntradaController;
+use App\Http\Controllers\VendaController;
 
 Route::redirect('/', '/produtos');
 
@@ -19,3 +20,6 @@ Route::post('/estoque/movimentacoes', [EstoqueController::class, 'store'])->name
 Route::get('/entradas', [EntradaController::class, 'index'])->name('entradas.index');
 
 Route::post('/entradas', [EntradaController::class, 'store'])->name('entradas.store');
+
+Route::post('/vendas', [VendaController::class, 'store'])->name('vendas.store');
+Route::post('/vendas/{venda}/cancelar', [VendaController::class, 'cancelar'])->name('vendas.cancelar');
