@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Models\Venda;
 use App\Fiscal\BrasilNfeEmissor;
 use App\Fiscal\EmissorFiscal;
+use App\Models\OrdemServico;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'entrada' => Entrada::class,
             'venda' => Venda::class,
+            'ordem_servico' => OrdemServico::class,
         ]);
     }
 }

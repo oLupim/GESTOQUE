@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\MotocicletaController;
+use App\Http\Controllers\OrdemServicoController;
 
 // Pública: clientes veem as peças disponíveis sem login.
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
@@ -52,4 +53,14 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::get('/motocicletas', [MotocicletaController::class, 'index'])->name('motocicletas.index');
         Route::post('/motocicletas', [MotocicletaController::class, 'store'])->name('motocicletas.store');
         Route::put('/motocicletas/{motocicleta}', [MotocicletaController::class, 'update'])->name('motocicletas.update');
+
+
+        Route::get('/servicos', [OrdemServicoController::class, 'index'])->name('servicos.index');
+        Route::post('/servicos', [OrdemServicoController::class, 'store'])->name('servicos.store');
+        Route::get('/servicos/{os}', [OrdemServicoController::class, 'show'])->name('servicos.show');
+        Route::put('/servicos/{os}', [OrdemServicoController::class, 'update'])->name('servicos.update');
+        Route::post('/servicos/{os}/status', [OrdemServicoController::class, 'status'])->name('servicos.status');
+        Route::post('/servicos/{os}/cancelar', [OrdemServicoController::class, 'cancelar'])->name('servicos.cancelar');
+        Route::post('/servicos/{os}/pecas', [OrdemServicoController::class, 'adicionarPeca'])->name('servicos.pecas.store');
+        Route::delete('/servicos/{os}/pecas/{item}', [OrdemServicoController::class, 'removerPeca'])->name('servicos.pecas.destroy');
    });
