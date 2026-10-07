@@ -1,11 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
-
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  --color-charcoal: #171918;
+  --color-graphite: #242625;
+  --color-graphite-2: #2e302f;
+  --color-red: #C9281F;
+  --color-red-dark: #8F1E19;
+  --color-red-muted: rgba(201, 40, 31, 0.12);
+  --color-cream: #F3EFE4;
+  --color-cream-dark: #EAE6DB;
+  --color-gray-light: #E5E2DA;
+  --color-gray-line: #D8D4CC;
+  --color-gray-text: #777A78;
+  --color-gray-muted: #9A9D9B;
+  --color-green: #1A7C4E;
+  --color-green-muted: rgba(26, 124, 78, 0.12);
+  --color-orange: #D4610D;
+  --color-orange-muted: rgba(212, 97, 13, 0.12);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Barlow', system-ui, sans-serif;
+  --font-condensed: 'Barlow Condensed', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
+
+html, body, #app { height: 100%; font-family: var(--font-sans); }
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D8D4CC; border-radius: 99px; }
+.sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+.transition-fast { transition: all 0.15s ease; }
+.transition-med { transition: all 0.25s ease; }
