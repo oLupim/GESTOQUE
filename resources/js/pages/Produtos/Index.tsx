@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import AppLayout from "@/layouts/AppLayout";
-import { PageHeader, Button, Input, Select, Card, Table, Th, Td, StatusBadge } from "@/components/ui";
+import { PageHeader, Button, Input, Select, Card, Table, Th, Td, StatusBadge, Modal } from "@/components/ui";
+import ProdutoForm from "./ProdutoForm";
 
 type Produto = {
   id: number;
@@ -28,6 +29,7 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
   const [categoria, setCategoria] = useState("");
   const [marca, setMarca] = useState("");
   const [situacao, setSituacao] = useState("");
+  const [novo, setNovo] = useState(false);
 
   const filtrados = produtos.filter((p) => {
     const q = busca.toLowerCase();
@@ -42,7 +44,7 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
   return (
     <AppLayout title="Produtos">
       <PageHeader title="Produtos" subtitle="Gerencie todas as peças e produtos da oficina.">
-        <Button variant="primary">
+        <Button variant="primary" onClick={() => setNovo(true)}>
           <Plus size={14} /> Novo produto
         </Button>
       </PageHeader>
@@ -114,6 +116,12 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
           <div className="py-12 text-center text-gray-text" style={{ fontSize: 14 }}>Nenhum produto encontrado.</div>
         )}
       </Card>
+
+      {novo && (
+        <Modal title="Novo produto" onClose={() => setNovo(false)} width="max-w-2xl">
+          <ProdutoForm onClose={() => setNovo(false)} />
+        </Modal>
+      )}
     </AppLayout>
   );
 }

@@ -2,18 +2,31 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Produto;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
-    {
-        $response = $this->get('/');
+    use RefreshDatabase;
 
-        $response->assertStatus(200);
+    public function test_pagina_inicial_redireciona_para_produtos(): void
+    {
+        $this->get('/')->assertRedirect('/produtos');
+    }
+
+    public function test_listagem_de_produtos_carrega_com_dados_do_banco(): void
+    {
+        $this->withoutVite();
+        Produto::factory()->count(3)->create();
+
+        $this->get('/produtos')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Produtos/Index', false)
+                ->has('produtos', 3)
+                ->has('categorias')
+                ->has('marcas'));
     }
 }
