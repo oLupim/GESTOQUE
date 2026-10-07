@@ -8,6 +8,8 @@ use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\VendaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\MotocicletaController;
 
 // Pública: clientes veem as peças disponíveis sem login.
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
@@ -42,4 +44,12 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::get('/vendas', [VendaController::class, 'index'])->name('vendas.index');
 
         Route::get('/vendas/nova', [VendaController::class, 'create'])->name('vendas.create');
+
+        Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+        Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
+        Route::put('/clientes/{cliente}', [ClienteController::class, 'update'])->name('clientes.update');
+
+        Route::get('/motocicletas', [MotocicletaController::class, 'index'])->name('motocicletas.index');
+        Route::post('/motocicletas', [MotocicletaController::class, 'store'])->name('motocicletas.store');
+        Route::put('/motocicletas/{motocicleta}', [MotocicletaController::class, 'update'])->name('motocicletas.update');
    });
