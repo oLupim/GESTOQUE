@@ -6,25 +6,36 @@ use Inertia\Inertia;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\VendaController;
+use App\Http\Controllers\LoginController;
 
-Route::redirect('/', '/produtos');
+   Route::middleware('guest')->group(function () {
+       Route::get('/login', [LoginController::class, 'create'])->name('login');
+       Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
+   });
 
-Route::get('/produtos', [ProdutoController::class, 'index'])->name('produtos.index');
 
-Route::post('/produtos', [ProdutoController::class, 'store'])->name('produtos.store');
+   Route::middleware('auth')->group(function () {
+       Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-Route::get('/estoque', [EstoqueController::class, 'index'])->name('estoque.index');
+        Route::redirect('/', '/produtos');
 
-Route::post('/estoque/movimentacoes', [EstoqueController::class, 'store'])->name('estoque.movimentar');
+        Route::get('/produtos', [ProdutoController::class, 'index'])->name('produtos.index');
 
-Route::get('/entradas', [EntradaController::class, 'index'])->name('entradas.index');
+        Route::post('/produtos', [ProdutoController::class, 'store'])->name('produtos.store');
 
-Route::post('/entradas', [EntradaController::class, 'store'])->name('entradas.store');
+        Route::get('/estoque', [EstoqueController::class, 'index'])->name('estoque.index');
 
-Route::post('/vendas', [VendaController::class, 'store'])->name('vendas.store');
+        Route::post('/estoque/movimentacoes', [EstoqueController::class, 'store'])->name('estoque.movimentar');
 
-Route::post('/vendas/{venda}/cancelar', [VendaController::class, 'cancelar'])->name('vendas.cancelar');
+        Route::get('/entradas', [EntradaController::class, 'index'])->name('entradas.index');
 
-Route::get('/vendas', [VendaController::class, 'index'])->name('vendas.index');
+        Route::post('/entradas', [EntradaController::class, 'store'])->name('entradas.store');
 
-Route::get('/vendas/nova', [VendaController::class, 'create'])->name('vendas.create');
+        Route::post('/vendas', [VendaController::class, 'store'])->name('vendas.store');
+
+        Route::post('/vendas/{venda}/cancelar', [VendaController::class, 'cancelar'])->name('vendas.cancelar');
+
+        Route::get('/vendas', [VendaController::class, 'index'])->name('vendas.index');
+
+        Route::get('/vendas/nova', [VendaController::class, 'create'])->name('vendas.create');
+   });

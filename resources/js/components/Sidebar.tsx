@@ -45,6 +45,9 @@ function NavLink({ item, active, onClick }: { item: Item; active: boolean; onCli
 
 export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boolean; onMobileClose: () => void }) {
   const { url } = usePage();
+  const { auth } = usePage<{ auth: { user: { name: string; perfil: string } | null } }>().props;
+  const nome = auth.user?.name ?? "";
+  const perfis: Record<string, string> = { administrador: "Administrador", balconista: "Balconista", mecanico: "Mecânico" };
   const isActive = (href: string) => url === href || url.startsWith(`${href}/`) || url.startsWith(`${href}?`);
 
   return (
@@ -63,7 +66,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
               className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-white font-bold"
               style={{ background: "#C9281F", fontFamily: "var(--font-condensed)", fontSize: 14 }}
             >
-              G
+              {nome.charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="text-white leading-none" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 17, letterSpacing: "0.06em" }}>
@@ -90,15 +93,15 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
               className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-semibold"
               style={{ background: "#C9281F", fontFamily: "var(--font-condensed)" }}
             >
-              G
+              {nome.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-white text-sm font-medium truncate">Gustavo</div>
-              <div className="text-xs truncate" style={{ color: "#777A78" }}>Administrador</div>
+              <div className="text-white text-sm font-medium truncate">{nome}</div>
+              <div className="text-xs truncate" style={{ color: "#777A78" }}>{perfis[auth.user?.perfil ?? ""] ?? ""}</div>
             </div>
-            <button className="text-gray-text hover:text-white transition-fast" title="Sair (em breve)">
+            <Link href="/logout" method="post" as="button" className="text-gray-text hover:text-white transition-fast" title="Sair">
               <LogOut size={14} />
-            </button>
+            </Link>
           </div>
         </div>
       </aside>
