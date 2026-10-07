@@ -54,6 +54,14 @@ export default function AppLayout({ title, children }: { title: string; children
               >
                 <Plus size={12} /> Venda
               </Link>
+              <a
+                href="/catalogo"
+                target="_blank"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-gray-text hover:text-charcoal hover:bg-cream transition-fast text-xs font-medium"
+                style={{ border: "1px solid #E5E2DA" }}
+              >
+                Ver catálogo
+              </a>
               <Link href="/notificacoes" className="relative p-2 rounded-md text-gray-text hover:text-charcoal hover:bg-cream transition-fast">
                 <Bell size={16} />
               </Link>

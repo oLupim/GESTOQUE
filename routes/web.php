@@ -1,12 +1,16 @@
 <?php
 
+use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\EntradaController;
+use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\VendaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\EstoqueController;
-use App\Http\Controllers\EntradaController;
-use App\Http\Controllers\VendaController;
-use App\Http\Controllers\LoginController;
+
+// Pública: clientes veem as peças disponíveis sem login.
+Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
 
    Route::middleware('guest')->group(function () {
        Route::get('/login', [LoginController::class, 'create'])->name('login');
