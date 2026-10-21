@@ -12,7 +12,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\MotocicletaController;
 use App\Http\Controllers\OrdemServicoController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\ConfiguracaoController;
 
 
 
@@ -25,6 +25,7 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
        Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
    });
 
+   
 
    Route::middleware('auth')->group(function () {
        Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
@@ -69,4 +70,9 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::post('/servicos/{os}/cancelar', [OrdemServicoController::class, 'cancelar'])->name('servicos.cancelar');
         Route::post('/servicos/{os}/pecas', [OrdemServicoController::class, 'adicionarPeca'])->name('servicos.pecas.store');
         Route::delete('/servicos/{os}/pecas/{item}', [OrdemServicoController::class, 'removerPeca'])->name('servicos.pecas.destroy');
+
+        Route::get('/configuracoes', [ConfiguracaoController::class, 'edit']);
+        Route::put('/configuracoes/perfil', [ConfiguracaoController::class, 'perfil']);
+        Route::put('/configuracoes/senha', [ConfiguracaoController::class, 'senha']);
+        Route::put('/configuracoes/fiscal', [ConfiguracaoController::class, 'fiscal']);
    });

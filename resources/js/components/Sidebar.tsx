@@ -22,7 +22,6 @@ const nav: Item[] = [
 
 const extras: Item[] = [
   { href: "/configuracoes", label: "Configurações", icon: Settings },
-  { href: "/notificacoes", label: "Notificações", icon: Bell },
 ];
 
 function NavLink({ item, active, onClick }: { item: Item; active: boolean; onClick: () => void }) {

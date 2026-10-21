@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { useEffect, useState, type ReactNode } from "react";
-import { Menu, Bell, Plus, Wrench, CheckCircle, AlertTriangle, X } from "lucide-react";
+import { Menu, Plus, Wrench, CheckCircle, AlertTriangle, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 
 export default function AppLayout({ title, children }: { title: string; children: ReactNode }) {
@@ -62,9 +62,6 @@ export default function AppLayout({ title, children }: { title: string; children
               >
                 Ver catálogo
               </a>
-              <Link href="/notificacoes" className="relative p-2 rounded-md text-gray-text hover:text-charcoal hover:bg-cream transition-fast">
-                <Bell size={16} />
-              </Link>
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
                 style={{ background: "#C9281F", fontFamily: "var(--font-condensed)" }}

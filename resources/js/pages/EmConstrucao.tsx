@@ -3,7 +3,7 @@ import AppLayout from "@/layouts/AppLayout";
 const nomes: Record<string, string> = {
   dashboard: "Dashboard", vendas: "Vendas", estoque: "Estoque", entradas: "Entradas",
   servicos: "Serviços", clientes: "Clientes", motocicletas: "Motocicletas", fiscal: "Fiscal",
-  relatorios: "Relatórios", configuracoes: "Configurações", notificacoes: "Notificações",
+  relatorios: "Relatórios", configuracoes: "Configurações",
 };
 
 export default function EmConstrucao({ modulo }: { modulo: string }) {
