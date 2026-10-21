@@ -97,10 +97,6 @@ class EmitirNotaFiscal
         if (! $config->prontaParaEmitir()) {
             throw new DomainException('Configure o CNPJ e o token da API fiscal antes de emitir.');
         }
-        if ((float) $venda->desconto > 0) {
-            // TODO: confirmar na documentação da Brasil NFe o campo de desconto por item.
-            throw new DomainException('Emissão de venda com desconto ainda não suportada.');
-        }
 
         $semFiscal = $venda->itens()->with('produto')->get()
             ->filter(fn (VendaItem $i) => blank($i->produto->ncm) || blank($i->produto->cfop))
@@ -117,6 +113,7 @@ class EmitirNotaFiscal
             'modelo' => DocumentoFiscal::NFCE,
             'forma_pagamento' => $venda->forma_pagamento,
             'total' => (float) $venda->total,
+            'desconto' => (float) $venda->desconto,
             'itens' => $venda->itens()->with('produto')->get()->map(fn (VendaItem $i) => [
                 'nome' => $i->produto->nome,
                 'ncm' => $i->produto->ncm,
@@ -124,6 +121,9 @@ class EmitirNotaFiscal
                 'quantidade' => (float) $i->quantidade,
                 'valor_unitario' => (float) $i->preco_unitario, // preço congelado na venda
                 'valor_total' => (float) $i->subtotal,
+                'codigo' => $i->produto->codigo,
+                'unidade' => $i->produto->unidade,
+                'origem' => (int) $i->produto->origem, 
             ])->all(),
         ];
     }

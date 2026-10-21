@@ -39,7 +39,7 @@ const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', curren
 
 export default function Fiscal({ documentos, contagem, filtro, config }: Props) {
   return (
-    <AppLayout>
+    <AppLayout title="Fiscal"> 
       <Head title="Fiscal" />
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">

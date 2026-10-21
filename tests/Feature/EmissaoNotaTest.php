@@ -75,8 +75,8 @@ class EmissaoNotaTest extends TestCase
             && $r['ModeloDocumento'] === 65
             && $r['Produtos'][0]['NCM'] === '27101932'
             && $r['Produtos'][0]['ValorUnitario'] === 65.0
-            && $r['Pagamentos'][0]['TipoPagamento'] === 17
-            && $r['Pagamentos'][0]['Valor'] === 130.0);
+            && $r['Pagamentos'][0]['FormaPagamento'] === 17
+            && $r['Pagamentos'][0]['VlPago'] === 130.0);
     }
 
     public function test_rejeitada_pode_ser_reenviada_no_mesmo_documento_sem_mexer_no_estoque(): void
