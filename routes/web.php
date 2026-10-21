@@ -13,7 +13,7 @@ use App\Http\Controllers\MotocicletaController;
 use App\Http\Controllers\OrdemServicoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ConfiguracaoController;
-
+use App\Http\Controllers\FiscalController;
 
 
 
@@ -75,4 +75,8 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::put('/configuracoes/perfil', [ConfiguracaoController::class, 'perfil']);
         Route::put('/configuracoes/senha', [ConfiguracaoController::class, 'senha']);
         Route::put('/configuracoes/fiscal', [ConfiguracaoController::class, 'fiscal']);
+
+        Route::get('/fiscal', [FiscalController::class, 'index']);
+        Route::get('/fiscal/{documento}/{tipo}', [FiscalController::class, 'arquivo'])->whereIn('tipo', ['xml', 'pdf']);
+        Route::post('/vendas/{venda}/nfce', [FiscalController::class, 'emitir'])->middleware('throttle:10,1');
    });

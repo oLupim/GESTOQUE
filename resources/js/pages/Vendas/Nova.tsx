@@ -28,7 +28,14 @@ function Sucesso({ venda, onNova }: { venda: VendaFeita; onNova: () => void }) {
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Button variant="primary" onClick={onNova}><Plus size={14} /> Nova venda</Button>
           <Link href="/vendas"><Button variant="secondary">Ver vendas</Button></Link>
-          <Button variant="secondary" disabled>Emitir NF-e (em breve)</Button>
+          <Link
+            href={`/vendas/${venda.id}/nfce`}
+            method="post"
+            as="button"
+            className="rounded-md bg-[#C9281F] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+          >
+            Emitir NFC-e
+          </Link>
         </div>
       </div>
     </div>

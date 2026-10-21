@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
  */
 class BrasilNfeEmissor implements EmissorFiscal
 {
-    public const URL = 'https://api.brasilnfe.com.br/services/Fiscal/EnviarNotaFiscal';
+    public const URL = 'https://api.brasilnfe.com.br/services/fiscal/EnviarNotaFiscal';
 
     // Códigos de forma de pagamento da SEFAZ (tPag).
     private const PAGAMENTO = ['dinheiro' => 1, 'credito' => 3, 'debito' => 4, 'pix' => 17];
