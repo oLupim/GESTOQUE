@@ -14,7 +14,7 @@ use App\Http\Controllers\OrdemServicoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\FiscalController;
-
+use App\Http\Controllers\RelatorioController;
 
 
 // Pública: clientes veem as peças disponíveis sem login.
@@ -79,4 +79,6 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::get('/fiscal', [FiscalController::class, 'index']);
         Route::get('/fiscal/{documento}/{tipo}', [FiscalController::class, 'arquivo'])->whereIn('tipo', ['xml', 'pdf']);
         Route::post('/vendas/{venda}/nfce', [FiscalController::class, 'emitir'])->middleware('throttle:10,1');
+
+        Route::get('/relatorios', [RelatorioController::class, 'index']);
    });
