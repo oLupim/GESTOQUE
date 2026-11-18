@@ -130,6 +130,75 @@ class ProdutoTest extends TestCase
         Storage::disk(config('gestoque.disco_imagens'))->assertMissing($caminho);
     }
 
+    /** A edição chega por POST com _method=put (igual ao formulário, que pode trazer foto). */
+    private function editar(Produto $produto, array $dados)
+    {
+        return $this->post("/produtos/{$produto->id}", ['_method' => 'put', ...$this->dados(['estoque_inicial' => null]), ...$dados]);
+    }
+
+    public function test_edita_nome_e_preco(): void
+    {
+        $this->post('/produtos', $this->dados());
+        $produto = Produto::firstOrFail();
+
+        $this->editar($produto, ['nome' => 'Óleo Motul 20W50', 'preco_venda' => '70,00'])
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $produto->refresh();
+        $this->assertSame('Óleo Motul 20W50', $produto->nome);
+        $this->assertEquals(70, (float) $produto->preco_venda);
+        $this->assertSame('OLE-001', $produto->codigo); // manter o próprio código não é "repetido"
+    }
+
+    public function test_edicao_nao_muda_o_estoque(): void
+    {
+        $this->post('/produtos', $this->dados(['estoque_inicial' => '12']));
+        $produto = Produto::firstOrFail();
+
+        // Mesmo mandando saldo/estoque_inicial, a edição ignora: estoque só muda por movimentação.
+        $this->editar($produto, ['saldo' => 999, 'estoque_inicial' => '50'])->assertSessionHasNoErrors();
+
+        $this->assertEquals(12, (float) $produto->fresh()->saldo);
+        $this->assertSame(1, $produto->movimentacoes()->count());
+    }
+
+    public function test_edicao_nao_aceita_codigo_de_outro_produto(): void
+    {
+        $this->post('/produtos', $this->dados());
+        $this->post('/produtos', $this->dados(['codigo' => 'COR-001', 'nome' => 'Correia']));
+        $correia = Produto::where('codigo', 'COR-001')->firstOrFail();
+
+        $this->editar($correia, ['codigo' => 'ole-001'])->assertSessionHasErrors('codigo');
+    }
+
+    public function test_produto_desativado_some_do_catalogo(): void
+    {
+        $this->post('/produtos', $this->dados());
+        $produto = Produto::firstOrFail();
+
+        $this->editar($produto, ['ativo' => false])->assertSessionHasNoErrors();
+
+        $this->assertFalse($produto->fresh()->ativo);
+        $this->withoutVite()->get('/catalogo')->assertInertia(fn ($page) => $page->has('produtos', 0));
+    }
+
+    public function test_edicao_troca_a_foto_e_apaga_a_antiga(): void
+    {
+        Storage::fake(config('gestoque.disco_imagens'));
+        $disco = Storage::disk(config('gestoque.disco_imagens'));
+        $this->post('/produtos', $this->dados(['foto' => UploadedFile::fake()->image('a.jpg')]));
+        $produto = Produto::firstOrFail();
+        $antiga = $produto->foto_path;
+
+        $this->editar($produto, ['foto' => UploadedFile::fake()->image('b.jpg')])->assertSessionHasNoErrors();
+
+        $nova = $produto->fresh()->foto_path;
+        $this->assertNotSame($antiga, $nova);
+        $disco->assertMissing($antiga);
+        $disco->assertExists($nova);
+    }
+
     public function test_salvar_foto_sem_escolher_nada_avisa(): void
     {
         $produto = Produto::factory()->create();

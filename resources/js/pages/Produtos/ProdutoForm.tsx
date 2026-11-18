@@ -25,25 +25,43 @@ function Secao({ titulo }: { titulo: string }) {
   );
 }
 
-export default function ProdutoForm({ onClose }: { onClose: () => void }) {
-  const { data, setData, post, processing, errors } = useForm<{
-    foto: File | null;
-    nome: string; categoria: string; marca: string; codigo: string; codigo_barras: string; unidade: string;
-    preco_custo: string; preco_venda: string; estoque_inicial: string; estoque_minimo: string; ncm: string; cfop: string;
-  }>({
+/** Dados de um produto já cadastrado, para abrir o formulário em modo de edição. */
+export type ProdutoEditavel = {
+  id: number;
+  nome: string; categoria: string | null; marca: string | null; codigo: string; codigo_barras: string | null; unidade: string;
+  preco_custo: number; preco_venda: number; estoque_minimo: number; saldo: number; ncm: string | null; cfop: string | null;
+  ativo: boolean; foto_url: string | null;
+};
+
+// 65.5 → "65,50" (como a pessoa digita no Brasil); zero vira campo vazio.
+const paraCampo = (v: number, casas = 2) => (v ? v.toFixed(casas).replace(".", ",") : "");
+
+type Dados = {
+  _method?: string;
+  foto: File | null; remover_foto: boolean; ativo: boolean;
+  nome: string; categoria: string; marca: string; codigo: string; codigo_barras: string; unidade: string;
+  preco_custo: string; preco_venda: string; estoque_inicial: string; estoque_minimo: string; ncm: string; cfop: string;
+};
+
+export default function ProdutoForm({ produto, onClose }: { produto?: ProdutoEditavel; onClose: () => void }) {
+  const { data, setData, post, processing, errors } = useForm<Dados>({
+    // Edição vai por POST com _method=put: assim a foto (arquivo) chega ao servidor.
+    ...(produto ? { _method: "put" } : {}),
     foto: null,
-    nome: "",
-    categoria: "",
-    marca: "",
-    codigo: "",
-    codigo_barras: "",
-    unidade: "UN",
-    preco_custo: "",
-    preco_venda: "",
+    remover_foto: false,
+    ativo: produto?.ativo ?? true,
+    nome: produto?.nome ?? "",
+    categoria: produto?.categoria ?? "",
+    marca: produto?.marca ?? "",
+    codigo: produto?.codigo ?? "",
+    codigo_barras: produto?.codigo_barras ?? "",
+    unidade: produto?.unidade ?? "UN",
+    preco_custo: produto ? paraCampo(produto.preco_custo) : "",
+    preco_venda: produto ? paraCampo(produto.preco_venda) : "",
     estoque_inicial: "",
-    estoque_minimo: "",
-    ncm: "",
-    cfop: "5102",
+    estoque_minimo: produto ? paraCampo(produto.estoque_minimo, 0) : "",
+    ncm: produto?.ncm ?? "",
+    cfop: produto?.cfop ?? "5102",
   });
 
   const custo = parseFloat(data.preco_custo.replace(",", "."));
@@ -52,13 +70,17 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
 
   const salvar = (e: FormEvent) => {
     e.preventDefault();
-    post("/produtos", { forceFormData: true, preserveScroll: true, onSuccess: () => onClose() });
+    post(produto ? `/produtos/${produto.id}` : "/produtos", { forceFormData: true, preserveScroll: true, onSuccess: () => onClose() });
   };
 
   return (
     <form onSubmit={salvar} className="space-y-5">
       <Campo label="Foto (opcional)" erro={errors.foto}>
-        <FotoInput onChange={(f) => setData("foto", f)} />
+        <FotoInput
+          fotoAtual={data.remover_foto ? null : produto?.foto_url}
+          onChange={(f) => setData((d) => ({ ...d, foto: f, remover_foto: false }))}
+          onRemover={produto ? () => setData((d) => ({ ...d, foto: null, remover_foto: true })) : undefined}
+        />
       </Campo>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -99,9 +121,19 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
 
       <Secao titulo="Estoque" />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Campo label="Qtd. inicial" erro={errors.estoque_inicial}>
-          <Input placeholder="0" value={data.estoque_inicial} onChange={(v) => setData("estoque_inicial", v)} />
-        </Campo>
+        {produto ? (
+          // Na edição o estoque não muda: só por movimentação (rastreabilidade).
+          <Campo label="Estoque atual">
+            <div className="px-3 py-2 rounded-md border text-sm" style={{ borderColor: "#D8D4CC", background: "#F9F7F3", fontFamily: "var(--font-mono)" }}>
+              {produto.saldo.toLocaleString("pt-BR", { maximumFractionDigits: 3 })} {produto.unidade.toLowerCase()}
+            </div>
+            <p className="text-gray-text text-xs mt-1">Para mudar, use Estoque → Movimentar.</p>
+          </Campo>
+        ) : (
+          <Campo label="Qtd. inicial" erro={errors.estoque_inicial}>
+            <Input placeholder="0" value={data.estoque_inicial} onChange={(v) => setData("estoque_inicial", v)} />
+          </Campo>
+        )}
         <Campo label="Estoque mínimo" erro={errors.estoque_minimo}>
           <Input placeholder="0" value={data.estoque_minimo} onChange={(v) => setData("estoque_minimo", v)} />
         </Campo>
@@ -122,10 +154,20 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
         </Campo>
       </div>
 
+      {produto && (
+        <label className="flex items-start gap-2 text-sm text-charcoal">
+          <input type="checkbox" className="mt-0.5 accent-[#C9281F]" checked={data.ativo} onChange={(e) => setData("ativo", e.target.checked)} />
+          <span>
+            Produto ativo
+            <span className="block text-gray-text text-xs">Desmarque para tirar do catálogo e das vendas. O histórico continua guardado.</span>
+          </span>
+        </label>
+      )}
+
       <div className="flex items-center justify-end gap-3 pt-3" style={{ borderTop: "1px solid #F0EDE5" }}>
         <Button variant="secondary" onClick={onClose}>Cancelar</Button>
         <Button variant="primary" type="submit" disabled={processing}>
-          {processing ? "Salvando..." : "Salvar produto"}
+          {processing ? "Salvando..." : produto ? "Salvar alterações" : "Salvar produto"}
         </Button>
       </div>
     </form>

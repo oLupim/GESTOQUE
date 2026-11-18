@@ -20,10 +20,14 @@ class ProdutoController extends Controller
         $produtos = Produto::orderBy('nome')->get()->map(fn (Produto $p) => [
             'id' => $p->id,
             'codigo' => $p->codigo,
+            'codigo_barras' => $p->codigo_barras,
             'nome' => $p->nome,
             'categoria' => $p->categoria,
             'marca' => $p->marca,
             'unidade' => $p->unidade,
+            'ncm' => $p->ncm,
+            'cfop' => $p->cfop,
+            'ativo' => (bool) $p->ativo,
             'preco_custo' => (float) $p->preco_custo,
             'preco_venda' => (float) $p->preco_venda,
             'saldo' => (float) $p->saldo,
@@ -69,6 +73,38 @@ class ProdutoController extends Controller
 
         return redirect()->route('produtos.index')
             ->with('success', "Produto \"{$produto->nome}\" cadastrado.");
+    }
+
+    /**
+     * Edita os dados do produto. O estoque (saldo) NÃO muda aqui: só por movimentação,
+     * para manter a rastreabilidade. Mudar o preço não altera vendas antigas (preço congelado no item).
+     * Chega por POST com _method=PUT porque pode trazer foto (o PHP não lê arquivo em PUT).
+     */
+    public function update(ProdutoRequest $request, Produto $produto): RedirectResponse
+    {
+        $dados = $request->validated();
+        unset($dados['foto'], $dados['remover_foto']);
+        $dados['preco_custo'] ??= 0;
+        $dados['estoque_minimo'] ??= 0;
+        $dados['ativo'] = $request->boolean('ativo', true);
+
+        $disco = Storage::disk(config('gestoque.disco_imagens'));
+        $fotoAntiga = $produto->foto_path;
+
+        if ($request->hasFile('foto')) {
+            $dados['foto_path'] = $request->file('foto')->store('produtos', config('gestoque.disco_imagens'));
+        } elseif ($request->boolean('remover_foto')) {
+            $dados['foto_path'] = null;
+        }
+
+        $produto->update($dados);
+
+        // Só apaga a foto antiga depois que o banco foi atualizado.
+        if (array_key_exists('foto_path', $dados) && $fotoAntiga) {
+            $disco->delete($fotoAntiga);
+        }
+
+        return back()->with('success', "Produto \"{$produto->nome}\" atualizado.");
     }
 
     /** Coloca, troca ou remove a foto de um produto já cadastrado. */

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Produto;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProdutoRequest extends FormRequest
 {
@@ -32,11 +33,17 @@ class ProdutoRequest extends FormRequest
         ]);
     }
 
+    /**
+     * Serve para cadastrar e para editar. Na edição: o código pode repetir o do próprio produto,
+     * não existe "quantidade inicial" (estoque só muda por movimentação) e dá para ativar/desativar.
+     */
     public function rules(): array
     {
-        return [
-            'codigo' => ['required', 'string', 'max:30', 'unique:produtos,codigo'],
-            'codigo_barras' => ['nullable', 'digits_between:8,14', 'unique:produtos,codigo_barras'],
+        $produto = $this->route('produto');
+
+        $regras = [
+            'codigo' => ['required', 'string', 'max:30', Rule::unique('produtos', 'codigo')->ignore($produto?->id)],
+            'codigo_barras' => ['nullable', 'digits_between:8,14', Rule::unique('produtos', 'codigo_barras')->ignore($produto?->id)],
             'nome' => ['required', 'string', 'max:120'],
             'categoria' => ['nullable', 'string', 'max:60'],
             'marca' => ['nullable', 'string', 'max:60'],
@@ -44,11 +51,19 @@ class ProdutoRequest extends FormRequest
             'preco_custo' => ['nullable', 'numeric', 'min:0'],
             'preco_venda' => ['required', 'numeric', 'gt:0'],
             'estoque_minimo' => ['nullable', 'numeric', 'min:0'],
-            'estoque_inicial' => ['nullable', 'numeric', 'min:0'],
             'ncm' => ['nullable', 'digits:8'],
             'cfop' => ['nullable', 'digits:4'],
             'foto' => Produto::REGRAS_FOTO,
         ];
+
+        if ($produto) {
+            $regras['ativo'] = ['boolean'];
+            $regras['remover_foto'] = ['boolean'];
+        } else {
+            $regras['estoque_inicial'] = ['nullable', 'numeric', 'min:0'];
+        }
+
+        return $regras;
     }
 
     public function messages(): array

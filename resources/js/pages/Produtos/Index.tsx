@@ -1,25 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { useForm } from "@inertiajs/react";
-import { Plus, Search, Camera } from "lucide-react";
+import { Plus, Search, Camera, Pencil } from "lucide-react";
 import AppLayout from "@/layouts/AppLayout";
-import { PageHeader, Button, Input, Select, Card, Table, Th, Td, StatusBadge, Modal } from "@/components/ui";
+import { PageHeader, Button, Input, Select, Card, Table, Th, Td, StatusBadge, Modal, Badge } from "@/components/ui";
 import FotoInput from "@/components/FotoInput";
-import ProdutoForm from "./ProdutoForm";
+import ProdutoForm, { type ProdutoEditavel } from "./ProdutoForm";
 
-type Produto = {
-  id: number;
-  codigo: string;
-  nome: string;
-  categoria: string | null;
-  marca: string | null;
-  unidade: string;
-  preco_custo: number;
-  preco_venda: number;
-  saldo: number;
-  estoque_minimo: number;
-  situacao: string;
-  foto_url: string | null;
-};
+type Produto = ProdutoEditavel & { situacao: string };
 
 type Props = { produtos: Produto[]; categorias: string[]; marcas: string[] };
 
@@ -86,6 +73,7 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
   const [situacao, setSituacao] = useState("");
   const [novo, setNovo] = useState(false);
   const [fotoDe, setFotoDe] = useState<Produto | null>(null);
+  const [editando, setEditando] = useState<Produto | null>(null);
 
   const filtrados = produtos.filter((p) => {
     const q = busca.toLowerCase();
@@ -134,16 +122,20 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
               <Th soDesktop className="text-right">Margem</Th>
               <Th className="text-right">Estoque</Th>
               <Th soDesktop>Status</Th>
+              <Th></Th>
             </tr>
           </thead>
           <tbody>
             {filtrados.map((p) => (
-              <tr key={p.id} className="hover:bg-cream/40 transition-fast">
+              <tr key={p.id} className={`hover:bg-cream/40 transition-fast ${p.ativo ? "" : "opacity-60"}`}>
                 <Td>
                   <div className="flex items-center gap-3">
                     <Miniatura produto={p} onClick={() => setFotoDe(p)} />
                     <div>
-                      <div className="text-charcoal font-medium" style={{ fontSize: 13.5 }}>{p.nome}</div>
+                      <div className="text-charcoal font-medium" style={{ fontSize: 13.5 }}>
+                        {p.nome}
+                        {!p.ativo && <span className="ml-2"><Badge variant="neutral">Inativo</Badge></span>}
+                      </div>
                       <div className="text-gray-text" style={{ fontSize: 11.5 }}>
                         {/* No celular, o código aparece junto da marca. */}
                         <span className="md:hidden" style={{ fontFamily: "var(--font-mono)" }}>{p.codigo} · </span>
@@ -164,6 +156,11 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
                   </span>
                 </Td>
                 <Td soDesktop><StatusBadge status={p.situacao} /></Td>
+                <Td className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => setEditando(p)}>
+                    <Pencil size={12} /> <span className="hidden sm:inline">Editar</span>
+                  </Button>
+                </Td>
               </tr>
             ))}
           </tbody>
@@ -176,6 +173,12 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
       {novo && (
         <Modal title="Novo produto" onClose={() => setNovo(false)} width="max-w-2xl">
           <ProdutoForm onClose={() => setNovo(false)} />
+        </Modal>
+      )}
+
+      {editando && (
+        <Modal title={`Editar: ${editando.nome}`} onClose={() => setEditando(null)} width="max-w-2xl">
+          <ProdutoForm produto={editando} onClose={() => setEditando(null)} />
         </Modal>
       )}
 
