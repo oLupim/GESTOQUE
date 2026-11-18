@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Produto;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProdutoRequest extends FormRequest
+class ProdutoRequest extends FormRequest
 {
     public const UNIDADES = ['UN', 'PAR', 'KIT', 'JG', 'L', 'ML', 'KG', 'M', 'FR', 'CX'];
 

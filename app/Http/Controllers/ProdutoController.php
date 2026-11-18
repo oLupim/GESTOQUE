@@ -6,7 +6,7 @@ use App\Models\Produto;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Enums\TipoMovimentacao;
-use App\Http\Requests\StoreProdutoRequest;
+use App\Http\Requests\ProdutoRequest;
 use App\Services\EstoqueService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,7 +38,7 @@ class ProdutoController extends Controller
             'marcas' => Produto::whereNotNull('marca')->distinct()->orderBy('marca')->pluck('marca'),
         ]);
     }
-        public function store(StoreProdutoRequest $request, EstoqueService $estoque): RedirectResponse
+        public function store(ProdutoRequest $request, EstoqueService $estoque): RedirectResponse
     {
         $dados = $request->validated();
         $inicial = (float) ($dados['estoque_inicial'] ?? 0);
