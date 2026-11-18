@@ -25,6 +25,7 @@ class CatalogoController extends Controller
                 'categoria' => $p->categoria,
                 'preco' => (float) $p->preco_venda,
                 'ultimas' => (float) $p->saldo <= (float) $p->estoque_minimo,
+                'foto_url' => $p->fotoUrl(),
             ])->values(),
             'categorias' => $produtos->pluck('categoria')->filter()->unique()->sort()->values(),
             // Dados salvos pelo administrador em Configurações → Empresa.

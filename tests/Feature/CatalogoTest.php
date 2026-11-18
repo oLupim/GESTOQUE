@@ -48,7 +48,7 @@ class CatalogoTest extends TestCase
 
         $this->get('/catalogo')->assertInertia(fn (Assert $page) => $page
             ->has('produtos.0', fn (Assert $item) => $item
-                ->hasAll(['id', 'nome', 'marca', 'categoria', 'preco', 'ultimas'])
+                ->hasAll(['id', 'nome', 'marca', 'categoria', 'preco', 'ultimas', 'foto_url'])
                 ->missingAll(['preco_custo', 'saldo', 'estoque_minimo', 'codigo'])));
     }
 

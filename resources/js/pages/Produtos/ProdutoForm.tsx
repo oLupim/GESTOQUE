@@ -1,6 +1,7 @@
 import { useForm } from "@inertiajs/react";
 import type { FormEvent, ReactNode } from "react";
 import { Button, Input, Select } from "@/components/ui";
+import FotoInput from "@/components/FotoInput";
 
 const UNIDADES = ["UN", "PAR", "KIT", "JG", "L", "ML", "KG", "M", "FR", "CX"];
 
@@ -25,7 +26,12 @@ function Secao({ titulo }: { titulo: string }) {
 }
 
 export default function ProdutoForm({ onClose }: { onClose: () => void }) {
-  const { data, setData, post, processing, errors } = useForm({
+  const { data, setData, post, processing, errors } = useForm<{
+    foto: File | null;
+    nome: string; categoria: string; marca: string; codigo: string; codigo_barras: string; unidade: string;
+    preco_custo: string; preco_venda: string; estoque_inicial: string; estoque_minimo: string; ncm: string; cfop: string;
+  }>({
+    foto: null,
     nome: "",
     categoria: "",
     marca: "",
@@ -46,11 +52,15 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
 
   const salvar = (e: FormEvent) => {
     e.preventDefault();
-    post("/produtos", { preserveScroll: true, onSuccess: () => onClose() });
+    post("/produtos", { forceFormData: true, preserveScroll: true, onSuccess: () => onClose() });
   };
 
   return (
     <form onSubmit={salvar} className="space-y-5">
+      <Campo label="Foto (opcional)" erro={errors.foto}>
+        <FotoInput onChange={(f) => setData("foto", f)} />
+      </Campo>
+
       <div className="grid grid-cols-2 gap-4">
         <Campo label="Nome do produto *" erro={errors.nome} className="col-span-2">
           <Input placeholder="Ex: Óleo Motul 10W40" value={data.nome} onChange={(v) => setData("nome", v)} />

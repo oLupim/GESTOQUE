@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Head } from "@inertiajs/react";
 import { Search, MessageCircle, MapPin } from "lucide-react";
 
-type Produto = { id: number; nome: string; marca: string | null; categoria: string | null; preco: number; ultimas: boolean };
+type Produto = { id: number; nome: string; marca: string | null; categoria: string | null; preco: number; ultimas: boolean; foto_url: string | null };
 type Props = {
   produtos: Produto[];
   categorias: string[];
@@ -96,9 +96,13 @@ export default function Catalogo({ produtos, categorias, oficina }: Props) {
               const pedir = linkWhatsapp(oficina.whatsapp, `Olá! Tenho interesse em: ${p.nome}${p.marca ? ` (${p.marca})` : ""} — ${brl(p.preco)}. Ainda está disponível?`);
               return (
                 <div key={p.id} className="bg-white rounded-lg p-4 flex flex-col" style={{ border: "1px solid #E5E2DA" }}>
-                  <div className="h-24 rounded-md mb-3 flex items-center justify-center" style={{ background: "#F0EDE5", color: "#9A9D9B", fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 28 }}>
-                    {p.nome.slice(0, 2).toUpperCase()}
-                  </div>
+                  {p.foto_url ? (
+                    <img src={p.foto_url} alt={p.nome} loading="lazy" className="h-40 w-full rounded-md mb-3 object-cover" style={{ background: "#F0EDE5" }} />
+                  ) : (
+                    <div className="h-24 rounded-md mb-3 flex items-center justify-center" style={{ background: "#F0EDE5", color: "#9A9D9B", fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 28 }}>
+                      {p.nome.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
                   <div className="text-gray-text uppercase" style={{ fontSize: 10.5, letterSpacing: "0.06em" }}>{p.categoria ?? "Peças"}</div>
                   <div className="text-charcoal font-medium mt-0.5" style={{ fontSize: 14 }}>{p.nome}</div>
                   {p.marca && <div className="text-gray-text" style={{ fontSize: 12 }}>{p.marca}</div>}

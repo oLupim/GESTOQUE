@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Produto;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProdutoRequest extends FormRequest
@@ -46,6 +47,7 @@ class StoreProdutoRequest extends FormRequest
             'estoque_inicial' => ['nullable', 'numeric', 'min:0'],
             'ncm' => ['nullable', 'digits:8'],
             'cfop' => ['nullable', 'digits:4'],
+            'foto' => Produto::REGRAS_FOTO,
         ];
     }
 
@@ -61,6 +63,7 @@ class StoreProdutoRequest extends FormRequest
             'digits' => ':Attribute deve ter :digits dígitos.',
             'digits_between' => ':Attribute deve ter entre :min e :max dígitos.',
             'in' => ':Attribute inválida.',
+            ...Produto::MENSAGENS_FOTO, // mais específicas que as genéricas acima
         ];
     }
 

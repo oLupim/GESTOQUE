@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { useForm } from "@inertiajs/react";
+import { Plus, Search, Camera } from "lucide-react";
 import AppLayout from "@/layouts/AppLayout";
 import { PageHeader, Button, Input, Select, Card, Table, Th, Td, StatusBadge, Modal } from "@/components/ui";
+import FotoInput from "@/components/FotoInput";
 import ProdutoForm from "./ProdutoForm";
 
 type Produto = {
@@ -16,9 +18,62 @@ type Produto = {
   saldo: number;
   estoque_minimo: number;
   situacao: string;
+  foto_url: string | null;
 };
 
 type Props = { produtos: Produto[]; categorias: string[]; marcas: string[] };
+
+/** Janela para tirar, trocar ou remover a foto de um produto já cadastrado. */
+function FotoProduto({ produto, onClose }: { produto: Produto; onClose: () => void }) {
+  const { data, setData, post, processing, errors } = useForm<{ foto: File | null; remover_foto: boolean }>({
+    foto: null,
+    remover_foto: false,
+  });
+
+  const salvar = (e: FormEvent) => {
+    e.preventDefault();
+    post(`/produtos/${produto.id}/foto`, { forceFormData: true, preserveScroll: true, onSuccess: () => onClose() });
+  };
+
+  return (
+    <form onSubmit={salvar} className="space-y-4">
+      <FotoInput
+        fotoAtual={data.remover_foto ? null : produto.foto_url}
+        onChange={(f) => setData((d) => ({ ...d, foto: f, remover_foto: false }))}
+        onRemover={() => setData((d) => ({ ...d, foto: null, remover_foto: true }))}
+        erro={errors.foto}
+      />
+      <div className="flex justify-end gap-3 pt-3" style={{ borderTop: "1px solid #F0EDE5" }}>
+        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+        <Button variant="primary" type="submit" disabled={processing || (!data.foto && !data.remover_foto)}>
+          {processing ? "Salvando..." : "Salvar foto"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+/** Miniatura: foto do produto ou as iniciais. Clicar abre a troca de foto. */
+function Miniatura({ produto, onClick }: { produto: Produto; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={produto.foto_url ? "Trocar foto" : "Adicionar foto"}
+      className="relative w-9 h-9 rounded-md flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden group"
+      style={{ background: "#F0EDE5", color: "#777A78", fontFamily: "var(--font-condensed)" }}
+    >
+      {produto.foto_url ? (
+        <img src={produto.foto_url} alt={produto.nome} className="w-full h-full object-cover" />
+      ) : (
+        produto.nome.slice(0, 2).toUpperCase()
+      )}
+      <span className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-fast">
+        <Camera size={14} />
+      </span>
+    </button>
+  );
+}
 
 const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const qtd = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 3 });
@@ -30,6 +85,7 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
   const [marca, setMarca] = useState("");
   const [situacao, setSituacao] = useState("");
   const [novo, setNovo] = useState(false);
+  const [fotoDe, setFotoDe] = useState<Produto | null>(null);
 
   const filtrados = produtos.filter((p) => {
     const q = busca.toLowerCase();
@@ -85,12 +141,7 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
               <tr key={p.id} className="hover:bg-cream/40 transition-fast">
                 <Td>
                   <div className="flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-md flex items-center justify-center text-xs font-bold flex-shrink-0"
-                      style={{ background: "#F0EDE5", color: "#777A78", fontFamily: "var(--font-condensed)" }}
-                    >
-                      {p.nome.slice(0, 2).toUpperCase()}
-                    </div>
+                    <Miniatura produto={p} onClick={() => setFotoDe(p)} />
                     <div>
                       <div className="text-charcoal font-medium" style={{ fontSize: 13.5 }}>{p.nome}</div>
                       <div className="text-gray-text" style={{ fontSize: 11.5 }}>{p.marca ?? "—"}</div>
@@ -120,6 +171,12 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
       {novo && (
         <Modal title="Novo produto" onClose={() => setNovo(false)} width="max-w-2xl">
           <ProdutoForm onClose={() => setNovo(false)} />
+        </Modal>
+      )}
+
+      {fotoDe && (
+        <Modal title={`Foto: ${fotoDe.nome}`} onClose={() => setFotoDe(null)}>
+          <FotoProduto produto={fotoDe} onClose={() => setFotoDe(null)} />
         </Modal>
       )}
     </AppLayout>

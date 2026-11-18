@@ -37,6 +37,8 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::get('/produtos', [ProdutoController::class, 'index'])->name('produtos.index');
 
         Route::post('/produtos', [ProdutoController::class, 'store'])->name('produtos.store');
+        // POST (e não PUT) porque o PHP não lê arquivo enviado por PUT.
+        Route::post('/produtos/{produto}/foto', [ProdutoController::class, 'foto'])->name('produtos.foto');
 
         Route::get('/estoque', [EstoqueController::class, 'index'])->name('estoque.index');
 

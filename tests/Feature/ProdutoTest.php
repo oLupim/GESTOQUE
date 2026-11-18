@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Enums\TipoMovimentacao;
 use App\Models\Produto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProdutoTest extends TestCase
@@ -72,5 +74,66 @@ class ProdutoTest extends TestCase
         $produto = Produto::firstOrFail();
         $this->assertEquals(0, (float) $produto->preco_custo);
         $this->assertEquals(0, (float) $produto->estoque_minimo);
+    }
+
+    public function test_cadastra_produto_com_foto(): void
+    {
+        Storage::fake(config('gestoque.disco_imagens'));
+
+        $this->post('/produtos', $this->dados(['foto' => UploadedFile::fake()->image('oleo.jpg', 800, 600)]))
+            ->assertRedirect('/produtos')
+            ->assertSessionHasNoErrors();
+
+        $produto = Produto::firstOrFail();
+        $this->assertStringStartsWith('produtos/', $produto->foto_path);
+        Storage::disk(config('gestoque.disco_imagens'))->assertExists($produto->foto_path);
+        $this->assertNotNull($produto->fotoUrl());
+    }
+
+    public function test_foto_que_nao_e_imagem_e_recusada_e_nada_e_gravado(): void
+    {
+        Storage::fake(config('gestoque.disco_imagens'));
+
+        $this->post('/produtos', $this->dados(['foto' => UploadedFile::fake()->create('nota.pdf', 50, 'application/pdf')]))
+            ->assertSessionHasErrors(['foto' => 'Envie uma imagem (JPG, PNG ou WEBP).']);
+
+        $this->assertSame(0, Produto::count());
+    }
+
+    public function test_trocar_foto_apaga_a_antiga(): void
+    {
+        Storage::fake(config('gestoque.disco_imagens'));
+        $disco = Storage::disk(config('gestoque.disco_imagens'));
+        $produto = Produto::factory()->create();
+
+        $this->post("/produtos/{$produto->id}/foto", ['foto' => UploadedFile::fake()->image('a.jpg')])->assertSessionHasNoErrors();
+        $antiga = $produto->fresh()->foto_path;
+
+        $this->post("/produtos/{$produto->id}/foto", ['foto' => UploadedFile::fake()->image('b.jpg')])->assertSessionHasNoErrors();
+        $nova = $produto->fresh()->foto_path;
+
+        $this->assertNotSame($antiga, $nova);
+        $disco->assertMissing($antiga);
+        $disco->assertExists($nova);
+    }
+
+    public function test_remover_foto_do_produto(): void
+    {
+        Storage::fake(config('gestoque.disco_imagens'));
+        $produto = Produto::factory()->create();
+        $this->post("/produtos/{$produto->id}/foto", ['foto' => UploadedFile::fake()->image('a.jpg')]);
+        $caminho = $produto->fresh()->foto_path;
+
+        $this->post("/produtos/{$produto->id}/foto", ['remover_foto' => true])->assertSessionHasNoErrors();
+
+        $this->assertNull($produto->fresh()->foto_path);
+        Storage::disk(config('gestoque.disco_imagens'))->assertMissing($caminho);
+    }
+
+    public function test_salvar_foto_sem_escolher_nada_avisa(): void
+    {
+        $produto = Produto::factory()->create();
+
+        $this->post("/produtos/{$produto->id}/foto", [])->assertSessionHasErrors('foto');
     }
 }
