@@ -77,7 +77,7 @@ class ConfiguracaoTest extends TestCase
 
     public function test_salva_nome_e_logo_da_empresa(): void
     {
-        Storage::fake('public');
+        Storage::fake(config('gestoque.disco_imagens'));
 
         $this->post('/configuracoes/empresa', [
             'empresa' => 'Oficina Teste',
@@ -87,12 +87,12 @@ class ConfiguracaoTest extends TestCase
         $user = auth()->user()->fresh();
         $this->assertSame('Oficina Teste', $user->empresa);
         $this->assertNotNull($user->foto_path);
-        Storage::disk('public')->assertExists($user->foto_path);
+        Storage::disk(config('gestoque.disco_imagens'))->assertExists($user->foto_path);
     }
 
     public function test_arquivo_que_nao_e_imagem_e_recusado(): void
     {
-        Storage::fake('public');
+        Storage::fake(config('gestoque.disco_imagens'));
 
         $this->post('/configuracoes/empresa', [
             'empresa' => 'Oficina Teste',
@@ -104,21 +104,21 @@ class ConfiguracaoTest extends TestCase
 
     public function test_remover_foto_apaga_o_arquivo(): void
     {
-        Storage::fake('public');
+        Storage::fake(config('gestoque.disco_imagens'));
 
         $this->post('/configuracoes/empresa', [
             'empresa' => 'Oficina Teste',
             'foto' => UploadedFile::fake()->image('logo.png'),
         ])->assertSessionHasNoErrors();
         $caminho = auth()->user()->fresh()->foto_path;
-        Storage::disk('public')->assertExists($caminho);
+        Storage::disk(config('gestoque.disco_imagens'))->assertExists($caminho);
 
         $this->post('/configuracoes/empresa', [
             'empresa' => 'Oficina Teste',
             'remover_foto' => true,
         ])->assertSessionHasNoErrors();
 
-        Storage::disk('public')->assertMissing($caminho);
+        Storage::disk(config('gestoque.disco_imagens'))->assertMissing($caminho);
         $this->assertNull(auth()->user()->fresh()->foto_path);
     }
 }

@@ -68,8 +68,9 @@ class EmitirNotaFiscal
 
         $pasta = "fiscal/{$venda->id}";
         $nome = $r->chave ?? "venda-{$venda->id}";
-        if ($r->xml) Storage::put("{$pasta}/{$nome}.xml", $r->xml);
-        if ($r->pdf) Storage::put("{$pasta}/{$nome}.pdf", $r->pdf);
+        $disco = Storage::disk(config('gestoque.disco_fiscal'));
+        if ($r->xml) $disco->put("{$pasta}/{$nome}.xml", $r->xml);
+        if ($r->pdf) $disco->put("{$pasta}/{$nome}.pdf", $r->pdf);
 
         $doc->update([
             'status' => DocumentoFiscal::AUTORIZADA,

@@ -1,47 +1,86 @@
-name: Deploy Laravel + React
+name: Testes
 
+# Roda a cada push na main e em pull requests.
+# O deploy é feito pelo Laravel Cloud, que publica sozinho a cada push na main.
 on:
   push:
-    branches: [ "main" ] # Executa toda vez que você enviar código para a branch main
+    branches: [ "main" ]
+  pull_request:
 
 jobs:
-  laravel-deploy:
-    # Usando a versão estável 24.04 para evitar os avisos de migração do GitHub
+  testes:
+    name: Testes (${{ matrix.banco }})
     runs-on: ubuntu-24.04
+
+    # Roda tudo duas vezes: uma com SQLite (como no PC) e outra com PostgreSQL (como na nuvem).
+    strategy:
+      fail-fast: false
+      matrix:
+        banco: [ sqlite, pgsql ]
+
+    # Banco PostgreSQL 16 temporário, só para os testes.
+    # Ele sobe nos dois casos; o job do SQLite simplesmente não usa.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: gestoque_testes
+          POSTGRES_USER: gestoque
+          POSTGRES_PASSWORD: gestoque
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gestoque"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
     - uses: actions/checkout@v4
 
-    # 1. Configura a versão correta do PHP
-    - name: Setup PHP
+    - name: Configurar PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.2' # Altere para a versão exata do PHP do seu servidor
-        extensions: mbstring, dom, fileinfo, curl
+        php-version: '8.2'
+        extensions: mbstring, dom, fileinfo, curl, gd, pdo_sqlite, pdo_pgsql
+        coverage: none
 
-    # 2. Instala as dependências do Laravel (Composer) sem rodar testes quebrados
-    - name: Install Composer Dependencies
-      run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+    - name: Instalar dependências do Composer
+      run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-    # 3. Configura o Node.js atualizado (Node 22) para evitar o aviso de depreciação
-    - name: Setup Node.js
+    - name: Configurar Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22'
+        cache: 'npm'
 
-    # 4. Instala e compila o React unificado (Vite / Inertia)
-    - name: Install & Build React (Vite)
+    - name: Instalar dependências do front
+      run: npm ci
+
+    - name: Checar tipos (TypeScript)
+      run: npx tsc --noEmit
+
+    - name: Compilar o front (Vite)
+      run: npm run build
+
+    - name: Preparar .env
       run: |
-        npm install
-        npm run build
+        cp .env.example .env
+        php artisan key:generate
 
-    # 5. O DEPLOY REAL: Enviar para o seu servidor
-    # IMPORTANTE: Descomente e configure uma das opções abaixo para os arquivos irem para a internet:
-    
-    # SE SEU SERVIDOR FOR FTP (Hospedagem comum):
-    # - name: 🚀 Sync Files via FTP
-    #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-    #   with:
-    #     server: ${{ secrets.FTP_SERVER }}
-    #     username: ${{ secrets.FTP_USERNAME }}
-    #     password: ${{ secrets.FTP_PASSWORD }}
+    # O phpunit.xml define sqlite/:memory:, mas não usa force="true",
+    # então as variáveis abaixo têm prioridade no job do PostgreSQL.
+    - name: Rodar testes (SQLite)
+      if: matrix.banco == 'sqlite'
+      run: php artisan test
+
+    - name: Rodar testes (PostgreSQL 16)
+      if: matrix.banco == 'pgsql'
+      env:
+        DB_CONNECTION: pgsql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 5432
+        DB_DATABASE: gestoque_testes
+        DB_USERNAME: gestoque
+        DB_PASSWORD: gestoque
+      run: php artisan test

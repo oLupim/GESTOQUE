@@ -90,7 +90,8 @@ class ConfiguracaoController extends Controller
         ], ['empresa' => 'nome da empresa']);
 
         $user = $request->user();
-        $disco = Storage::disk('public');
+        $nomeDisco = config('gestoque.disco_imagens');
+        $disco = Storage::disk($nomeDisco);
 
         if ($request->hasFile('foto') || $request->boolean('remover_foto')) {
             // Apaga o logo antigo para não acumular arquivos.
@@ -99,7 +100,7 @@ class ConfiguracaoController extends Controller
             }
 
             $user->foto_path = $request->hasFile('foto')
-                ? $request->file('foto')->store('logos', 'public')
+                ? $request->file('foto')->store('logos', $nomeDisco)
                 : null;
         }
 

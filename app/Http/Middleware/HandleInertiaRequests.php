@@ -44,7 +44,7 @@ class HandleInertiaRequests extends Middleware
                     ...$request->user()->only('id', 'name', 'email', 'perfil'),
                     'empresa' => $request->user()->empresa ?: config('gestoque.oficina'),
                     'foto_url' => $request->user()->foto_path
-                        ? Storage::disk('public')->url($request->user()->foto_path)
+                        ? Storage::disk(config('gestoque.disco_imagens'))->url($request->user()->foto_path)
                         : null,
                 ] : null,
             ],

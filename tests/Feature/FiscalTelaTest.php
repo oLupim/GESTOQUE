@@ -48,8 +48,8 @@ class FiscalTelaTest extends TestCase
 
     public function test_download_do_xml(): void
     {
-        Storage::fake();
-        Storage::put('fiscal/1/chave.xml', '<nfe/>');
+        Storage::fake(config('gestoque.disco_fiscal'));
+        Storage::disk(config('gestoque.disco_fiscal'))->put('fiscal/1/chave.xml', '<nfe/>');
 
         $doc = DocumentoFiscal::forceCreate([
             'venda_id' => $this->venda()->id, 'modelo' => 65, 'ambiente' => 2,

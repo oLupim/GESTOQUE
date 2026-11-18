@@ -29,7 +29,7 @@ class EmissaoNotaTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake();
+        Storage::fake(config('gestoque.disco_fiscal'));
 
         ConfiguracaoFiscal::atual()->update(['cnpj' => '12345678000199', 'api_token' => 'token-teste']);
 
@@ -66,8 +66,8 @@ class EmissaoNotaTest extends TestCase
 
         $this->assertSame(DocumentoFiscal::AUTORIZADA, $doc->status);
         $this->assertSame(str_repeat('4', 44), $doc->chave);
-        Storage::assertExists($doc->xml_path);
-        Storage::assertExists($doc->pdf_path);
+        Storage::disk(config('gestoque.disco_fiscal'))->assertExists($doc->xml_path);
+        Storage::disk(config('gestoque.disco_fiscal'))->assertExists($doc->pdf_path);
 
         // Conferindo o que foi enviado para a Brasil NFe.
         Http::assertSent(fn (Request $r) => $r->hasHeader('Token', 'token-teste')

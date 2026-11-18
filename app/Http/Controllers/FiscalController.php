@@ -68,8 +68,10 @@ class FiscalController extends Controller
     {
         $caminho = $tipo === 'xml' ? $documento->xml_path : $documento->pdf_path;
 
-        abort_unless($caminho && Storage::exists($caminho), 404);
+        $disco = Storage::disk(config('gestoque.disco_fiscal'));
 
-        return Storage::download($caminho);
+        abort_unless($caminho && $disco->exists($caminho), 404);
+
+        return $disco->download($caminho);
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Venda;
 use App\Fiscal\BrasilNfeEmissor;
 use App\Fiscal\EmissorFiscal;
 use App\Models\OrdemServico;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Em produção todos os links gerados usam https (o app fica atrás de um proxy).
+        if (app()->isProduction()) {
+            URL::forceScheme('https');
+        }
+
         Relation::morphMap([
             'entrada' => Entrada::class,
             'venda' => Venda::class,

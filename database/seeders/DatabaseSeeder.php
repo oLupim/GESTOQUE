@@ -15,6 +15,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Os dados abaixo são só para desenvolvimento (senha "password").
+        // Em produção a conta do dono é criada com: php artisan gestoque:usuario
+        if (app()->isProduction()) {
+            $this->command?->warn('Seeder ignorado: não rode dados de exemplo em produção. Use php artisan gestoque:usuario.');
+
+            return;
+        }
+
         User::factory()->create([
             'name' => 'Gustavo',
             'email' => 'admin@gestoque.test',
