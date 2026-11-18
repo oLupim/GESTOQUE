@@ -53,9 +53,11 @@ class OrdemServicoTest extends TestCase
 
     public function test_abrir_os_baixa_pecas_calcula_total_e_atualiza_km(): void
     {
-        $this->abrir()->assertRedirect('/servicos/1');
+        $resposta = $this->abrir();
 
+        // Não fixa o id: no PostgreSQL o contador de ids não volta entre os testes.
         $os = OrdemServico::firstOrFail();
+        $resposta->assertRedirect("/servicos/{$os->id}");
         $this->assertSame(OrdemServico::ABERTA, $os->status);
         $this->assertEquals(158, (float) $os->valor_pecas);  // 2×65 + 28
         $this->assertEquals(208, (float) $os->total);        // + 50 de mão de obra
