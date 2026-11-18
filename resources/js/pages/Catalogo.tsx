@@ -91,15 +91,17 @@ export default function Catalogo({ produtos, categorias, oficina }: Props) {
             </div>
           </div>
 
-          <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
+          {/* Fotos verticais (3x4): 2 por linha no celular, até 5 no computador. */}
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filtrados.map((p) => {
               const pedir = linkWhatsapp(oficina.whatsapp, `Olá! Tenho interesse em: ${p.nome}${p.marca ? ` (${p.marca})` : ""} — ${brl(p.preco)}. Ainda está disponível?`);
               return (
-                <div key={p.id} className="bg-white rounded-lg p-4 flex flex-col" style={{ border: "1px solid #E5E2DA" }}>
+                <div key={p.id} className="bg-white rounded-lg p-2.5 sm:p-4 flex flex-col min-w-0" style={{ border: "1px solid #E5E2DA" }}>
+                  {/* Área da imagem sempre 3x4 (vertical), com ou sem foto, para a grade ficar alinhada. */}
                   {p.foto_url ? (
-                    <img src={p.foto_url} alt={p.nome} loading="lazy" className="h-40 w-full rounded-md mb-3 object-cover" style={{ background: "#F0EDE5" }} />
+                    <img src={p.foto_url} alt={p.nome} loading="lazy" className="aspect-[3/4] w-full rounded-md mb-3 object-cover" style={{ background: "#F0EDE5" }} />
                   ) : (
-                    <div className="h-24 rounded-md mb-3 flex items-center justify-center" style={{ background: "#F0EDE5", color: "#9A9D9B", fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 28 }}>
+                    <div className="aspect-[3/4] w-full rounded-md mb-3 flex items-center justify-center" style={{ background: "#F0EDE5", color: "#9A9D9B", fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 28 }}>
                       {p.nome.slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -107,14 +109,14 @@ export default function Catalogo({ produtos, categorias, oficina }: Props) {
                   <div className="text-charcoal font-medium mt-0.5" style={{ fontSize: 14 }}>{p.nome}</div>
                   {p.marca && <div className="text-gray-text" style={{ fontSize: 12 }}>{p.marca}</div>}
                   <div className="flex-1" />
-                  <div className="flex items-end justify-between mt-3">
-                    <div className="text-charcoal" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 22 }}>{brl(p.preco)}</div>
+                  <div className="flex flex-wrap items-end justify-between gap-x-2 mt-3">
+                    <div className="text-charcoal text-lg sm:text-[22px] whitespace-nowrap" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}>{brl(p.preco)}</div>
                     <span className="text-xs font-medium" style={{ color: p.ultimas ? "#D4610D" : "#1A7C4E" }}>
                       {p.ultimas ? "Últimas unidades" : "Disponível"}
                     </span>
                   </div>
                   {pedir && (
-                    <a href={pedir} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-1.5 py-2 rounded-md text-white text-sm font-medium bg-red hover:bg-red-dark transition-fast">
+                    <a href={pedir} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-1.5 py-2 px-1 rounded-md text-white text-xs sm:text-sm font-medium text-center bg-red hover:bg-red-dark transition-fast">
                       <MessageCircle size={13} /> Pedir pelo WhatsApp
                     </a>
                   )}
