@@ -1,9 +1,9 @@
 <?php
 
 return [
+    // Nome padrão enquanto o administrador não salvar o nome em Configurações → Empresa.
+    // WhatsApp, endereço e logo ficam só na tela (tabela "oficina").
     'oficina' => env('OFICINA_NOME', 'Moto Mecânica'),
-    'whatsapp' => env('OFICINA_WHATSAPP'),
-    'endereco' => env('OFICINA_ENDERECO'),
 
     // Disco das imagens públicas (logos e, no futuro, fotos de produtos).
     // Local: 'public' (storage/app/public). Na nuvem: o bucket público "imagens".

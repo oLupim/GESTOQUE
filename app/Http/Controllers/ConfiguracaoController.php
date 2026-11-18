@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ConfiguracaoFiscal;
+use App\Models\Oficina;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -77,35 +78,50 @@ class ConfiguracaoController extends Controller
         return back()->with('success', 'Configuração fiscal salva.');
     }
 
-        public function empresa(Request $request)
+    /** Dados da oficina (só administrador: a rota exige can:administrar). */
+    public function empresa(Request $request)
     {
+        // WhatsApp: guarda só os dígitos. Endereço vazio vira null.
+        $request->merge([
+            'whatsapp' => preg_replace('/\D/', '', (string) $request->input('whatsapp')) ?: null,
+            'endereco' => trim((string) $request->input('endereco')) ?: null,
+        ]);
+
         $dados = $request->validate([
             'empresa' => ['required', 'string', 'max:100'],
+            'whatsapp' => ['nullable', 'digits_between:12,13'],
+            'endereco' => ['nullable', 'string', 'max:200'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remover_foto' => ['boolean'],
         ], [
+            'whatsapp.digits_between' => 'Informe o WhatsApp com 55 + DDD + número. Ex.: 55 54 99999-9999.',
+            // "uploaded" = o PHP recusou antes (arquivo maior que o limite do servidor).
+            'foto.uploaded' => 'Não foi possível enviar a imagem. Tente uma foto menor.',
             'foto.image' => 'Envie uma imagem (JPG, PNG ou WEBP).',
             'foto.mimes' => 'Envie uma imagem (JPG, PNG ou WEBP).',
             'foto.max' => 'A imagem pode ter no máximo 2 MB.',
-        ], ['empresa' => 'nome da empresa']);
+        ], ['empresa' => 'nome da empresa', 'endereco' => 'endereço']);
 
-        $user = $request->user();
+        $oficina = Oficina::atual();
         $nomeDisco = config('gestoque.disco_imagens');
         $disco = Storage::disk($nomeDisco);
 
         if ($request->hasFile('foto') || $request->boolean('remover_foto')) {
             // Apaga o logo antigo para não acumular arquivos.
-            if ($user->foto_path) {
-                $disco->delete($user->foto_path);
+            if ($oficina->logo_path) {
+                $disco->delete($oficina->logo_path);
             }
 
-            $user->foto_path = $request->hasFile('foto')
+            $oficina->logo_path = $request->hasFile('foto')
                 ? $request->file('foto')->store('logos', $nomeDisco)
                 : null;
         }
 
-        $user->empresa = $dados['empresa'];
-        $user->save();
+        $oficina->fill([
+            'nome' => $dados['empresa'],
+            'whatsapp' => $dados['whatsapp'],
+            'endereco' => $dados['endereco'],
+        ])->save();
 
         return back()->with('success', 'Dados da empresa atualizados.');
     }

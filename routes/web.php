@@ -76,10 +76,10 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::put('/configuracoes/perfil', [ConfiguracaoController::class, 'perfil']);
         Route::put('/configuracoes/senha', [ConfiguracaoController::class, 'senha']);
         Route::put('/configuracoes/fiscal', [ConfiguracaoController::class, 'fiscal']);
-        Route::post('/configuracoes/empresa', [ConfiguracaoController::class, 'empresa']);
-
-        // Contas de acesso: só administrador.
+        // Só administrador: dados da oficina e contas de acesso.
         Route::middleware('can:administrar')->group(function () {
+            Route::post('/configuracoes/empresa', [ConfiguracaoController::class, 'empresa']);
+
             Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
             Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
             Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');

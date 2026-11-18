@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Oficina;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -40,15 +40,12 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => fn () => $request->user() ? [
-                    ...$request->user()->only('id', 'name', 'email', 'perfil'),
-                    'empresa' => $request->user()->empresa ?: config('gestoque.oficina'),
-                    'foto_url' => $request->user()->foto_path
-                        ? Storage::disk(config('gestoque.disco_imagens'))->url($request->user()->foto_path)
-                        : null,
-                ] : null,
+                'user' => fn () => $request->user()?->only('id', 'name', 'email', 'perfil'),
             ],
-            
+
+            // Nome, logo, WhatsApp e endereço da oficina (só para quem está logado).
+            'oficina' => fn () => $request->user() ? Oficina::atual()->paraTela() : null,
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

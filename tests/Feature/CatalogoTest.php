@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Oficina;
 use App\Models\Produto;
 use App\Services\EstoqueService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,5 +50,21 @@ class CatalogoTest extends TestCase
             ->has('produtos.0', fn (Assert $item) => $item
                 ->hasAll(['id', 'nome', 'marca', 'categoria', 'preco', 'ultimas'])
                 ->missingAll(['preco_custo', 'saldo', 'estoque_minimo', 'codigo'])));
+    }
+
+    public function test_catalogo_mostra_dados_da_oficina_salvos_na_tela(): void
+    {
+        $this->withoutVite();
+        Oficina::atual()->update([
+            'nome' => 'Oficina do Dono',
+            'whatsapp' => '5554999991234',
+            'endereco' => 'Nova Prata/RS',
+        ]);
+
+        $this->get('/catalogo')->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->where('oficina.nome', 'Oficina do Dono')
+            ->where('oficina.whatsapp', '5554999991234')
+            ->where('oficina.endereco', 'Nova Prata/RS')
+            ->where('oficina.logo_url', null));
     }
 }

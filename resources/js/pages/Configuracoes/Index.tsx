@@ -1,7 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import AppLayout from '@/layouts/AppLayout';
-import { useUsuario } from '@/components/Marca';
+import { useOficina, useUsuario } from '@/components/Marca';
+import { reduzirImagem } from '@/lib/imagem';
 
 type Props = {
   perfil: { name: string; email: string };
@@ -42,8 +43,12 @@ function Cartao({ titulo, descricao, children }: { titulo: string; descricao: st
 
 export default function Configuracoes({ perfil, fiscal }: Props) {
   const usuario = useUsuario();
-  const e = useForm<{ empresa: string; foto: File | null; remover_foto: boolean }>({
-    empresa: usuario?.empresa ?? '',
+  const oficina = useOficina();
+  const ehAdmin = usuario?.perfil === 'administrador';
+  const e = useForm<{ empresa: string; whatsapp: string; endereco: string; foto: File | null; remover_foto: boolean }>({
+    empresa: oficina?.nome ?? '',
+    whatsapp: oficina?.whatsapp ?? '',
+    endereco: oficina?.endereco ?? '',
     foto: null,
     remover_foto: false,
   });
@@ -62,8 +67,21 @@ export default function Configuracoes({ perfil, fiscal }: Props) {
     return () => URL.revokeObjectURL(url);
   }, [e.data.foto]);
 
-  const previa = previaLocal ?? (e.data.remover_foto ? null : usuario?.foto_url ?? null);
-  const inicial = (e.data.empresa || usuario?.name || 'G').trim().charAt(0).toUpperCase();
+  const previa = previaLocal ?? (e.data.remover_foto ? null : oficina?.logo_url ?? null);
+  const inicial = (e.data.empresa || 'G').trim().charAt(0).toUpperCase();
+
+  // Foto do celular é grande: reduz no próprio navegador antes de enviar.
+  const [preparando, setPreparando] = useState(false);
+  const escolherFoto = async (arquivo: File | null) => {
+    if (!arquivo) return;
+    setPreparando(true);
+    try {
+      const reduzida = await reduzirImagem(arquivo, { maxLado: 512 });
+      e.setData((d) => ({ ...d, foto: reduzida, remover_foto: false }));
+    } finally {
+      setPreparando(false);
+    }
+  };
 
   const removerFoto = () => {
     e.setData((d) => ({ ...d, foto: null, remover_foto: true }));
@@ -111,7 +129,9 @@ export default function Configuracoes({ perfil, fiscal }: Props) {
       <div className="mx-auto max-w-3xl space-y-6">
         <h1 className="text-2xl font-bold">Configurações</h1>
 
-        <Cartao titulo="Empresa" descricao="Nome e logo exibidos no menu e no topo do sistema.">
+        {/* Só o administrador altera os dados da oficina. */}
+        {ehAdmin && (
+        <Cartao titulo="Empresa" descricao="Nome e logo aparecem no menu, no topo e no catálogo público. WhatsApp e endereço aparecem no catálogo.">
           <form onSubmit={salvarEmpresa} className="grid gap-4 sm:grid-cols-2">
             <div className="flex items-center gap-4 sm:col-span-2">
               {previa ? (
@@ -130,20 +150,40 @@ export default function Configuracoes({ perfil, fiscal }: Props) {
             <Campo label="Nome da empresa" erro={e.errors.empresa}>
               <input className={campo} value={e.data.empresa} onChange={(ev) => e.setData('empresa', ev.target.value)} />
             </Campo>
-            <Campo label="Logo (JPG, PNG ou WEBP, até 2 MB)" erro={e.errors.foto}>
+            <Campo label="Logo (foto da galeria ou da câmera)" erro={e.errors.foto}>
+              {/* image/* faz o celular oferecer "Câmera" e "Galeria". */}
               <input
                 key={inputKey}
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept="image/*"
                 className={campo}
-                onChange={(ev) => e.setData((d) => ({ ...d, foto: ev.target.files?.[0] ?? null, remover_foto: false }))}
+                disabled={preparando}
+                onChange={(ev) => escolherFoto(ev.target.files?.[0] ?? null)}
+              />
+              {preparando && <span className="block text-xs text-neutral-500">Preparando imagem…</span>}
+            </Campo>
+            <Campo label="WhatsApp (com 55 e DDD)" erro={e.errors.whatsapp}>
+              <input
+                className={campo}
+                value={e.data.whatsapp}
+                onChange={(ev) => e.setData('whatsapp', ev.target.value)}
+                placeholder="55 54 99999-9999 (deixe vazio para esconder os botões)"
+              />
+            </Campo>
+            <Campo label="Endereço" erro={e.errors.endereco}>
+              <input
+                className={campo}
+                value={e.data.endereco}
+                onChange={(ev) => e.setData('endereco', ev.target.value)}
+                placeholder="Rua, número, cidade/UF"
               />
             </Campo>
             <div className="sm:col-span-2">
-              <button className={botao} disabled={e.processing}>Salvar empresa</button>
+              <button className={botao} disabled={e.processing || preparando}>Salvar empresa</button>
             </div>
           </form>
         </Cartao>
+        )}
 
         <Cartao titulo="Minha conta" descricao="Nome e e-mail usados no login.">
           <form onSubmit={salvarPerfil} className="grid gap-4 sm:grid-cols-2">

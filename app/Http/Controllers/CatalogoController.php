@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Oficina;
 use App\Models\Produto;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,11 +27,8 @@ class CatalogoController extends Controller
                 'ultimas' => (float) $p->saldo <= (float) $p->estoque_minimo,
             ])->values(),
             'categorias' => $produtos->pluck('categoria')->filter()->unique()->sort()->values(),
-            'oficina' => [
-                'nome' => config('gestoque.oficina'),
-                'whatsapp' => config('gestoque.whatsapp'),
-                'endereco' => config('gestoque.endereco'),
-            ],
+            // Dados salvos pelo administrador em Configurações → Empresa.
+            'oficina' => Oficina::atual()->paraTela(),
         ]);
     }
 }

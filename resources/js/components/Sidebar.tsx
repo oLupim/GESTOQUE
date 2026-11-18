@@ -4,7 +4,7 @@ import {
   Wrench, Users, Bike, FileText, BarChart2, Settings, LogOut, Bell, ChevronRight, UserCog,
 } from "lucide-react";
 import type { ElementType } from "react";
-import { FotoEmpresa, useUsuario } from '@/components/Marca';
+import { FotoEmpresa, useOficina, useUsuario } from '@/components/Marca';
 
 type Item = { href: string; label: string; icon: ElementType };
 
@@ -52,6 +52,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
   const { url } = usePage();
   const { auth } = usePage<{ auth: { user: { name: string; perfil: string } | null } }>().props;
   const usuario = useUsuario();
+  const oficina = useOficina();
   const nome = auth.user?.name ?? "";
   const perfis: Record<string, string> = { administrador: "Administrador", mecanico: "Mecânico" };
   const isActive = (href: string) => url === href || url.startsWith(`${href}/`) || url.startsWith(`${href}?`);
@@ -73,7 +74,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
               <div className="text-white leading-none" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 17, letterSpacing: "0.06em" }}>
                 GESTOQUE
               </div>
-              <div className="mt-0.5 truncate" style={{ color: "#777A78", fontSize: 10 }}>{usuario?.empresa}</div>
+              <div className="mt-0.5 truncate" style={{ color: "#777A78", fontSize: 10 }}>{oficina?.nome}</div>
             </div>
           </div>
         </div>

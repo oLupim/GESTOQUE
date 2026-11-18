@@ -35,8 +35,6 @@ class User extends Authenticatable
         'password',
         'perfil',
         'ativo',
-        'empresa',
-        'foto_path',
     ];
 
     /**

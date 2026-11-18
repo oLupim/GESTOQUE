@@ -84,6 +84,12 @@ No ambiente, clique em **Add resource** → **Object Storage** (Bucket).
 
 O Cloud cria sozinho a configuração e as chaves de acesso dos dois discos. Você não precisa copiar nenhuma chave.
 
+> **Atenção: nome do bucket ≠ disk name.** O nome do bucket (ex.: `gestoque-imagens`) é só um rótulo. O que o sistema usa é o **Disk** que aparece no cartão do bucket, na tela do ambiente (Environment). Confira lá:
+> - cartão do bucket privado: **Disk = `fiscal`** e **Default = Yes**;
+> - cartão do bucket público: **Disk = `imagens`** e Default desmarcado.
+>
+> Se o Disk do bucket público tiver outro nome (por exemplo `private`) e o painel não deixar mudar, **use esse nome na variável**: `IMAGENS_DISK=private`. A regra é: o valor de `IMAGENS_DISK` precisa ser **igual ao Disk do bucket público**. Se não for, o logo é salvo mas aparece como imagem quebrada. Depois de ajustar, faça um novo **Deploy** e reenvie o logo.
+
 ## 6. Variáveis de ambiente
 
 Em **Settings** → **Environment variables** (Variáveis de ambiente), adicione:
@@ -93,9 +99,6 @@ APP_NAME=Gestoque
 APP_ENV=production
 APP_DEBUG=false
 APP_LOCALE=pt_BR
-OFICINA_NOME="Nome da oficina"
-OFICINA_WHATSAPP=55DDDNUMERO
-OFICINA_ENDERECO="Cidade/UF"
 IMAGENS_DISK=imagens
 ADMIN_NOME="Nome do Dono"
 ADMIN_EMAIL=email@exemplo.com
@@ -108,6 +111,7 @@ Observações:
 - `APP_KEY` é gerada pelo Cloud. Não troque depois que o sistema estiver em uso: as senhas continuam funcionando, mas o token da Brasil NFe (criptografado com essa chave) deixa de abrir.
 - Confira se `APP_URL` está com o endereço `https://...` do app. Se estiver vazio ou diferente, defina com o endereço que aparece no topo do painel.
 - `FISCAL_DISK` não precisa ser definida: sem ela, o sistema usa o disco padrão (o bucket `fiscal`).
+- **Nome, logo, WhatsApp e endereço da oficina não são variáveis.** O administrador preenche tudo no sistema, em **Configurações → Empresa**. Eles aparecem no menu, no topo e no catálogo público. (Opcional: `OFICINA_NOME` define só o nome mostrado enquanto ninguém salvou o nome.)
 
 Depois de salvar as variáveis, clique em **Deploy** para publicar.
 
@@ -146,7 +150,7 @@ Abra o endereço do app e confira, nesta ordem:
 - [ ] `https://SEU-APP/up` responde (página de "Application up").
 - [ ] **Login** com o administrador padrão (`ADMIN_EMAIL` / `ADMIN_SENHA`).
 - [ ] **Usuários:** criar uma conta de mecânico, entrar com ela numa janela anônima e conferir que o menu **Usuários** não aparece.
-- [ ] **Configurações → Empresa:** salvar o nome e enviar um logo. O logo aparece no menu e no canto superior direito (vem do bucket `imagens`).
+- [ ] **Configurações → Empresa:** salvar nome, logo, WhatsApp e endereço. O logo aparece no menu, no canto superior direito e no catálogo (vem do bucket de imagens).
 - [ ] **Produtos:** cadastrar um produto.
 - [ ] **Entradas:** dar entrada no estoque desse produto.
 - [ ] **Vendas → Nova venda:** fazer uma venda com o produto. O saldo diminui em **Estoque**.

@@ -5,31 +5,41 @@ export type UsuarioLogado = {
   name: string;
   email: string;
   perfil: string;
-  empresa: string | null;
-  foto_url: string | null;
+};
+
+/** Dados da oficina, salvos pelo administrador em Configurações → Empresa. */
+export type DadosOficina = {
+  nome: string;
+  logo_url: string | null;
+  whatsapp: string | null;
+  endereco: string | null;
 };
 
 export function useUsuario(): UsuarioLogado | null {
   return (usePage().props as unknown as { auth: { user: UsuarioLogado | null } }).auth.user;
 }
 
-/** Logo da empresa; sem foto, mostra a inicial do nome da empresa. */
+export function useOficina(): DadosOficina | null {
+  return (usePage().props as unknown as { oficina: DadosOficina | null }).oficina ?? null;
+}
+
+/** Logo da oficina; sem logo, mostra a inicial do nome no quadrado vermelho. */
 export function FotoEmpresa({ tamanho = 32, redonda = false }: { tamanho?: number; redonda?: boolean }) {
-  const usuario = useUsuario();
+  const oficina = useOficina();
   const forma = redonda ? 'rounded-full' : 'rounded';
 
-  if (usuario?.foto_url) {
+  if (oficina?.logo_url) {
     return (
       <img
-        src={usuario.foto_url}
-        alt={usuario.empresa ?? 'Logo da empresa'}
+        src={oficina.logo_url}
+        alt={oficina.nome}
         className={`${forma} flex-shrink-0 bg-white object-cover`}
         style={{ width: tamanho, height: tamanho }}
       />
     );
   }
 
-  const inicial = (usuario?.empresa || usuario?.name || 'G').trim().charAt(0).toUpperCase();
+  const inicial = (oficina?.nome || 'G').trim().charAt(0).toUpperCase();
 
   return (
     <div

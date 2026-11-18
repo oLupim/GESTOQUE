@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ConfiguracaoFiscal;
+use App\Models\Oficina;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -67,27 +68,57 @@ class ConfiguracaoTest extends TestCase
         $this->assertNotSame('TOKEN-TESTE', DB::table('configuracao_fiscal')->value('api_token'));
     }
 
-    public function test_sem_empresa_salva_usa_nome_do_config_e_sem_foto(): void
+    public function test_sem_empresa_salva_usa_nome_do_config_e_sem_logo(): void
     {
         $this->get('/configuracoes')->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('auth.user.empresa', config('gestoque.oficina'))
-            ->where('auth.user.foto_url', null)
+            ->where('oficina.nome', config('gestoque.oficina'))
+            ->where('oficina.logo_url', null)
+            ->where('oficina.whatsapp', null)
         );
     }
 
-    public function test_salva_nome_e_logo_da_empresa(): void
+    public function test_salva_nome_logo_whatsapp_e_endereco_da_oficina(): void
     {
         Storage::fake(config('gestoque.disco_imagens'));
 
         $this->post('/configuracoes/empresa', [
             'empresa' => 'Oficina Teste',
+            'whatsapp' => '+55 (54) 99999-1234',
+            'endereco' => 'Rua A, 10 - Nova Prata/RS',
             'foto' => UploadedFile::fake()->image('logo.png', 200, 200),
         ])->assertSessionHasNoErrors()->assertSessionHas('success', 'Dados da empresa atualizados.');
 
-        $user = auth()->user()->fresh();
-        $this->assertSame('Oficina Teste', $user->empresa);
-        $this->assertNotNull($user->foto_path);
-        Storage::disk(config('gestoque.disco_imagens'))->assertExists($user->foto_path);
+        $oficina = Oficina::atual();
+        $this->assertSame('Oficina Teste', $oficina->nome);
+        $this->assertSame('5554999991234', $oficina->whatsapp);
+        $this->assertSame('Rua A, 10 - Nova Prata/RS', $oficina->endereco);
+        Storage::disk(config('gestoque.disco_imagens'))->assertExists($oficina->logo_path);
+        $this->assertSame(1, Oficina::count());
+    }
+
+    public function test_whatsapp_sem_ddi_e_recusado(): void
+    {
+        $this->post('/configuracoes/empresa', ['empresa' => 'Oficina Teste', 'whatsapp' => '54 99999-1234'])
+            ->assertSessionHasErrors('whatsapp');
+    }
+
+    public function test_mecanico_nao_altera_dados_da_oficina(): void
+    {
+        $this->actingAs(User::factory()->create(['perfil' => 'mecanico']));
+
+        $this->post('/configuracoes/empresa', ['empresa' => 'Invasor'])->assertForbidden();
+
+        $this->assertNotSame('Invasor', Oficina::atual()->nome);
+    }
+
+    public function test_mecanico_ve_nome_da_oficina_salvo_pelo_admin(): void
+    {
+        Oficina::atual()->update(['nome' => 'Oficina do Dono']);
+        $this->actingAs(User::factory()->create(['perfil' => 'mecanico']));
+
+        $this->get('/dashboard')->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('oficina.nome', 'Oficina do Dono')
+        );
     }
 
     public function test_arquivo_que_nao_e_imagem_e_recusado(): void
@@ -99,7 +130,16 @@ class ConfiguracaoTest extends TestCase
             'foto' => UploadedFile::fake()->create('documento.pdf', 100, 'application/pdf'),
         ])->assertSessionHasErrors('foto');
 
-        $this->assertNull(auth()->user()->fresh()->foto_path);
+        $this->assertNull(Oficina::atual()->logo_path);
+    }
+
+    public function test_foto_recusada_pelo_servidor_mostra_mensagem_clara(): void
+    {
+        // Simula o PHP recusando um arquivo maior que o limite (upload_max_filesize).
+        $arquivo = new UploadedFile(UploadedFile::fake()->image('grande.jpg')->getPathname(), 'grande.jpg', 'image/jpeg', UPLOAD_ERR_INI_SIZE, true);
+
+        $this->post('/configuracoes/empresa', ['empresa' => 'Oficina Teste', 'foto' => $arquivo])
+            ->assertSessionHasErrors(['foto' => 'Não foi possível enviar a imagem. Tente uma foto menor.']);
     }
 
     public function test_remover_foto_apaga_o_arquivo(): void
@@ -110,7 +150,7 @@ class ConfiguracaoTest extends TestCase
             'empresa' => 'Oficina Teste',
             'foto' => UploadedFile::fake()->image('logo.png'),
         ])->assertSessionHasNoErrors();
-        $caminho = auth()->user()->fresh()->foto_path;
+        $caminho = Oficina::atual()->logo_path;
         Storage::disk(config('gestoque.disco_imagens'))->assertExists($caminho);
 
         $this->post('/configuracoes/empresa', [
@@ -119,6 +159,6 @@ class ConfiguracaoTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         Storage::disk(config('gestoque.disco_imagens'))->assertMissing($caminho);
-        $this->assertNull(auth()->user()->fresh()->foto_path);
+        $this->assertNull(Oficina::atual()->logo_path);
     }
 }

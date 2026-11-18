@@ -6,7 +6,7 @@ type Produto = { id: number; nome: string; marca: string | null; categoria: stri
 type Props = {
   produtos: Produto[];
   categorias: string[];
-  oficina: { nome: string; whatsapp: string | null; endereco: string | null };
+  oficina: { nome: string; logo_url: string | null; whatsapp: string | null; endereco: string | null };
 };
 
 const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
@@ -36,9 +36,13 @@ export default function Catalogo({ produtos, categorias, oficina }: Props) {
         <header className="bg-charcoal">
           <div className="max-w-6xl mx-auto px-5 py-6 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded flex items-center justify-center text-white font-bold bg-red" style={{ fontFamily: "var(--font-condensed)", fontSize: 18 }}>
-                {oficina.nome.charAt(0)}
-              </div>
+              {oficina.logo_url ? (
+                <img src={oficina.logo_url} alt={oficina.nome} className="w-10 h-10 rounded bg-white object-cover" />
+              ) : (
+                <div className="w-10 h-10 rounded flex items-center justify-center text-white font-bold bg-red" style={{ fontFamily: "var(--font-condensed)", fontSize: 18 }}>
+                  {oficina.nome.charAt(0)}
+                </div>
+              )}
               <div>
                 <div className="text-white leading-none" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 22, letterSpacing: "0.04em" }}>
                   {oficina.nome.toUpperCase()}
