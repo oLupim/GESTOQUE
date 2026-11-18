@@ -40,7 +40,7 @@ O banco e os buckets devem ficar na **mesma região** do app.
 
 No ambiente (environment) `main`, abra **Settings** (Configurações) → **Deployments** (ou "Build & Deploy").
 
-- **Versão do PHP:** 8.2 (a mesma usada no PC e no GitHub Actions).
+- **Versão do PHP:** 8.4 (a mesma usada no GitHub Actions). O PHP 8.2 deixa de receber correções de segurança em 31/12/2026.
 - **Comandos de build** (rodam antes de publicar):
 
   ```
