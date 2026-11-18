@@ -53,7 +53,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
   const { auth } = usePage<{ auth: { user: { name: string; perfil: string } | null } }>().props;
   const usuario = useUsuario();
   const nome = auth.user?.name ?? "";
-  const perfis: Record<string, string> = { administrador: "Administrador", balconista: "Balconista", mecanico: "Mecânico" };
+  const perfis: Record<string, string> = { administrador: "Administrador", mecanico: "Mecânico" };
   const isActive = (href: string) => url === href || url.startsWith(`${href}/`) || url.startsWith(`${href}?`);
 
   return (

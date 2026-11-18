@@ -16,7 +16,6 @@ class User extends Authenticatable
     /** Perfis de acesso e seus nomes na tela. */
     public const PERFIS = [
         'administrador' => 'Administrador',
-        'balconista' => 'Balconista',
         'mecanico' => 'Mecânico',
     ];
 

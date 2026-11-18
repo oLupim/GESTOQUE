@@ -33,7 +33,7 @@ function UsuarioForm({ usuario, perfis, proprio, onClose }: { usuario?: Usuario;
   const { data, setData, post, put, processing, errors } = useForm({
     name: usuario?.name ?? "",
     email: usuario?.email ?? "",
-    perfil: usuario?.perfil ?? "balconista",
+    perfil: usuario?.perfil ?? "mecanico",
     ativo: usuario?.ativo ?? true,
     password: "",
     password_confirmation: "",

@@ -21,7 +21,7 @@ export default function Login() {
             </div>
             <div>
               <div className="text-white leading-none" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 24, letterSpacing: "0.06em" }}>GESTOQUE</div>
-              <div style={{ color: "#777A78", fontSize: 11 }}>Lupim Moto Mecânica</div>
+              <div style={{ color: "#777A78", fontSize: 11 }}>Moto Mecânica</div>
             </div>
           </div>
 

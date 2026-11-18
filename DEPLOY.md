@@ -130,7 +130,7 @@ Depois do primeiro login:
 2. Apague a variável `ADMIN_SENHA` do painel; ela não é mais necessária.
 
 **Contas de funcionários.** Entre como administrador e abra **Usuários** no menu:
-- **Novo usuário:** nome, e-mail, perfil (Administrador, Balconista ou Mecânico) e senha.
+- **Novo usuário:** nome, e-mail, perfil (Administrador ou Mecânico) e senha.
 - **Editar:** troca de dados, perfil ou senha (senha em branco mantém a atual).
 - **Desativar:** desmarque "Conta ativa". A pessoa é desconectada na hora e não consegue mais entrar. Contas não são excluídas porque vendas e movimentações guardam quem fez cada operação.
 
@@ -145,7 +145,7 @@ Abra o endereço do app e confira, nesta ordem:
 
 - [ ] `https://SEU-APP/up` responde (página de "Application up").
 - [ ] **Login** com o administrador padrão (`ADMIN_EMAIL` / `ADMIN_SENHA`).
-- [ ] **Usuários:** criar uma conta de balconista, entrar com ela numa janela anônima e conferir que o menu **Usuários** não aparece.
+- [ ] **Usuários:** criar uma conta de mecânico, entrar com ela numa janela anônima e conferir que o menu **Usuários** não aparece.
 - [ ] **Configurações → Empresa:** salvar o nome e enviar um logo. O logo aparece no menu e no canto superior direito (vem do bucket `imagens`).
 - [ ] **Produtos:** cadastrar um produto.
 - [ ] **Entradas:** dar entrada no estoque desse produto.

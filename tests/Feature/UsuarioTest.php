@@ -15,9 +15,9 @@ class UsuarioTest extends TestCase
     private function dados(array $extra = []): array
     {
         return [
-            'name' => 'Pedro Balcão',
+            'name' => 'Pedro Mecânico',
             'email' => 'pedro@oficina.com',
-            'perfil' => 'balconista',
+            'perfil' => 'mecanico',
             'password' => 'senhaForte1',
             'password_confirmation' => 'senhaForte1',
             ...$extra,
@@ -38,7 +38,7 @@ class UsuarioTest extends TestCase
         $this->post('/usuarios', $this->dados())->assertSessionHasNoErrors();
 
         $user = User::where('email', 'pedro@oficina.com')->firstOrFail();
-        $this->assertSame('balconista', $user->perfil);
+        $this->assertSame('mecanico', $user->perfil);
         $this->assertTrue($user->ativo);
         $this->assertTrue(Hash::check('senhaForte1', $user->password));
     }
@@ -51,16 +51,32 @@ class UsuarioTest extends TestCase
             ->assertSessionHasErrors(['email', 'perfil', 'password']);
     }
 
-    public function test_balconista_e_mecanico_nao_acessam_usuarios(): void
+    public function test_mecanico_nao_acessa_usuarios(): void
     {
-        foreach (['balconista', 'mecanico'] as $perfil) {
-            $this->actingAs(User::factory()->create(['perfil' => $perfil]));
+        $this->actingAs(User::factory()->create(['perfil' => 'mecanico']));
 
-            $this->get('/usuarios')->assertForbidden();
-            $this->post('/usuarios', $this->dados(['email' => "{$perfil}@x.com"]))->assertForbidden();
-        }
+        $this->get('/usuarios')->assertForbidden();
+        $this->post('/usuarios', $this->dados(['email' => 'novo@x.com']))->assertForbidden();
 
-        $this->assertFalse(User::where('email', 'like', '%@x.com')->exists());
+        $this->assertFalse(User::where('email', 'novo@x.com')->exists());
+    }
+
+    public function test_perfil_balconista_nao_existe_mais(): void
+    {
+        $this->post('/usuarios', $this->dados(['perfil' => 'balconista']))->assertSessionHasErrors('perfil');
+
+        $this->assertFalse(User::where('email', 'pedro@oficina.com')->exists());
+    }
+
+    public function test_migration_converte_balconista_em_mecanico(): void
+    {
+        $antigo = User::factory()->create(['perfil' => 'balconista']);
+
+        $migration = require database_path('migrations/2026_11_18_120000_remover_perfil_balconista.php');
+        $migration->up();
+
+        $this->assertSame('mecanico', $antigo->fresh()->perfil);
+        $this->assertSame('administrador', auth()->user()->fresh()->perfil);
     }
 
     public function test_edicao_com_senha_vazia_mantem_a_senha(): void
@@ -68,13 +84,13 @@ class UsuarioTest extends TestCase
         $outro = User::factory()->create(['password' => 'senhaAntiga1', 'perfil' => 'mecanico']);
 
         $this->put("/usuarios/{$outro->id}", [
-            'name' => 'Novo Nome', 'email' => $outro->email, 'perfil' => 'balconista', 'ativo' => true,
+            'name' => 'Novo Nome', 'email' => $outro->email, 'perfil' => 'administrador', 'ativo' => true,
             'password' => '', 'password_confirmation' => '',
         ])->assertSessionHasNoErrors();
 
         $outro->refresh();
         $this->assertSame('Novo Nome', $outro->name);
-        $this->assertSame('balconista', $outro->perfil);
+        $this->assertSame('administrador', $outro->perfil);
         $this->assertTrue(Hash::check('senhaAntiga1', $outro->password));
     }
 
@@ -94,7 +110,7 @@ class UsuarioTest extends TestCase
         $eu = auth()->user();
 
         $this->put("/usuarios/{$eu->id}", [
-            'name' => $eu->name, 'email' => $eu->email, 'perfil' => 'balconista', 'ativo' => false,
+            'name' => $eu->name, 'email' => $eu->email, 'perfil' => 'mecanico', 'ativo' => false,
         ])->assertSessionHasErrors(['ativo', 'perfil']);
 
         $eu->refresh();
