@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Arquivos do Claude Code (contexto e configurações locais): só para uso no PC, não vão para o GitHub
+/CLAUDE.md
+/CLAUDE.local.md
+/.claude
