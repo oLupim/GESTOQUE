@@ -20,7 +20,8 @@ export default function AppLayout({ title, children }: { title: string; children
   return (
     <>
       <Head title={title} />
-      <div className="flex h-full min-h-screen bg-cream">
+      {/* Sem h-full: com ele a caixa ficava presa na altura da tela e o fundo bege "cortava" nas páginas compridas. */}
+      <div className="flex min-h-screen bg-cream">
         <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
         <div className="flex-1 flex flex-col min-w-0 lg:ml-60">
