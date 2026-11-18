@@ -58,7 +58,7 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
 
   return (
     <form onSubmit={salvar} className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo label="Cliente *" erro={errors.cliente_id}>
           <Select value={data.cliente_id} onChange={(v) => setData((d) => ({ ...d, cliente_id: v, motocicleta_id: "", km_entrada: "" }))} className="w-full">
             <option value="">Selecionar cliente...</option>
@@ -73,7 +73,7 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
         </Campo>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo label="Quilometragem de entrada" erro={errors.km_entrada}>
           <Input value={data.km_entrada} onChange={(v) => setData("km_entrada", v)} placeholder="38420" />
         </Campo>
@@ -197,20 +197,26 @@ export default function ServicosIndex({ ordens, contagem, clientes, produtos }: 
       <Card>
         <Table>
           <thead>
-            <tr><Th>#</Th><Th>Cliente</Th><Th>Motocicleta</Th><Th>Placa</Th><Th>Serviço</Th><Th>Data</Th><Th className="text-right">Valor</Th><Th>Status</Th><Th>Mecânico</Th></tr>
+            <tr><Th soDesktop>#</Th><Th>Cliente</Th><Th soDesktop>Motocicleta</Th><Th soDesktop>Placa</Th><Th soDesktop>Serviço</Th><Th soDesktop>Data</Th><Th className="text-right">Valor</Th><Th soDesktop>Status</Th><Th soDesktop>Mecânico</Th></tr>
           </thead>
           <tbody>
             {filtradas.map((o) => (
               <tr key={o.id} className="hover:bg-cream/40 transition-fast">
-                <Td><Link href={`/servicos/${o.id}`} className="text-red hover:underline" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>#{o.id}</Link></Td>
-                <Td><Link href={`/servicos/${o.id}`} className="font-medium text-charcoal hover:underline">{o.cliente}</Link></Td>
-                <Td><span className="text-gray-text text-sm">{o.moto}</span></Td>
-                <Td><span className="px-2 py-0.5 rounded text-xs" style={{ background: "#F0EDE5", color: "#777A78", fontFamily: "var(--font-mono)" }}>{formatarPlaca(o.placa)}</span></Td>
-                <Td><span className="text-charcoal text-sm">{o.servico}</span></Td>
-                <Td><span className="text-gray-text text-sm">{o.data}</span></Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-condensed)", fontWeight: 600, fontSize: 15 }}>{brl(o.total)}</span></Td>
-                <Td><StatusBadge status={o.status} /></Td>
-                <Td><span className="text-gray-text text-sm">{o.mecanico}</span></Td>
+                <Td soDesktop><Link href={`/servicos/${o.id}`} className="text-red hover:underline" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>#{o.id}</Link></Td>
+                <Td>
+                  <Link href={`/servicos/${o.id}`} className="font-medium text-charcoal hover:underline">{o.cliente}</Link>
+                  {/* No celular: OS, moto, placa, serviço e status embaixo do cliente. Tocar no nome abre a OS. */}
+                  <div className="md:hidden text-gray-text text-xs mt-0.5">#{o.id} · {o.moto} · {formatarPlaca(o.placa)}</div>
+                  <div className="md:hidden text-charcoal text-xs">{o.servico}</div>
+                  <div className="md:hidden mt-1"><StatusBadge status={o.status} /></div>
+                </Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{o.moto}</span></Td>
+                <Td soDesktop><span className="px-2 py-0.5 rounded text-xs" style={{ background: "#F0EDE5", color: "#777A78", fontFamily: "var(--font-mono)" }}>{formatarPlaca(o.placa)}</span></Td>
+                <Td soDesktop><span className="text-charcoal text-sm">{o.servico}</span></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{o.data}</span></Td>
+                <Td className="text-right"><span className="whitespace-nowrap" style={{ fontFamily: "var(--font-condensed)", fontWeight: 600, fontSize: 15 }}>{brl(o.total)}</span></Td>
+                <Td soDesktop><StatusBadge status={o.status} /></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{o.mecanico}</span></Td>
               </tr>
             ))}
           </tbody>

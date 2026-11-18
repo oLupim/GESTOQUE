@@ -39,7 +39,7 @@ export default function MotocicletasIndex({ motos, clientes }: Props) {
       <Card>
         <Table>
           <thead>
-            <tr><Th>Motocicleta</Th><Th>Placa</Th><Th>Ano</Th><Th>Proprietário</Th><Th className="text-right">Quilometragem</Th></tr>
+            <tr><Th>Motocicleta</Th><Th>Placa</Th><Th soDesktop>Ano</Th><Th soDesktop>Proprietário</Th><Th soDesktop className="text-right">Quilometragem</Th></tr>
           </thead>
           <tbody>
             {filtradas.map((m) => (
@@ -50,16 +50,18 @@ export default function MotocicletasIndex({ motos, clientes }: Props) {
                     <div>
                       <div className="text-charcoal font-medium">{m.marca} {m.modelo}</div>
                       <div className="text-gray-text text-xs">{m.cor ?? "—"}</div>
+                      {/* No celular, o dono e a quilometragem aparecem aqui. */}
+                      <div className="md:hidden text-gray-text text-xs mt-0.5">{m.cliente} · {m.km_atual.toLocaleString("pt-BR")} km</div>
                     </div>
                   </div>
                 </Td>
-                <Td><span className="px-2 py-0.5 rounded text-xs" style={{ background: "#F0EDE5", color: "#777A78", fontFamily: "var(--font-mono)" }}>{formatarPlaca(m.placa)}</span></Td>
-                <Td><span className="text-gray-text text-sm">{m.ano ?? "—"}</span></Td>
-                <Td>
+                <Td><span className="px-2 py-0.5 rounded text-xs whitespace-nowrap" style={{ background: "#F0EDE5", color: "#777A78", fontFamily: "var(--font-mono)" }}>{formatarPlaca(m.placa)}</span></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{m.ano ?? "—"}</span></Td>
+                <Td soDesktop>
                   <div className="text-charcoal text-sm">{m.cliente}</div>
                   <div className="text-gray-text text-xs">{formatarTelefone(m.telefone)}</div>
                 </Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{m.km_atual.toLocaleString("pt-BR")} km</span></Td>
+                <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{m.km_atual.toLocaleString("pt-BR")} km</span></Td>
               </tr>
             ))}
           </tbody>

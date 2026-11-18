@@ -53,7 +53,7 @@ function NovaEntrada({ produtos, onClose }: { produtos: Produto[]; onClose: () =
 
   return (
     <form onSubmit={salvar} className="space-y-5">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <Rotulo>Fornecedor</Rotulo>
           <Input placeholder="Ex.: Distribuidora X" value={data.fornecedor} onChange={(v) => setData("fornecedor", v)} />
@@ -155,23 +155,28 @@ export default function EntradasIndex({ entradas, produtos }: Props) {
         <Table>
           <thead>
             <tr>
-              <Th>#</Th><Th>Data</Th><Th>Fornecedor</Th><Th>Nota</Th><Th>Produtos</Th>
-              <Th className="text-right">Total</Th><Th>Usuário</Th>
+              <Th soDesktop>#</Th><Th soDesktop>Data</Th><Th>Fornecedor</Th><Th soDesktop>Nota</Th><Th soDesktop>Produtos</Th>
+              <Th className="text-right">Total</Th><Th soDesktop>Usuário</Th>
             </tr>
           </thead>
           <tbody>
             {filtradas.map((e) => (
               <tr key={e.id} className="hover:bg-cream/40 transition-fast">
-                <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>#{e.id}</span></Td>
-                <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{e.data}</span></Td>
-                <Td><span className="font-medium text-charcoal">{e.fornecedor ?? "—"}</span></Td>
-                <Td><span className="text-gray-text text-sm">{e.documento ?? "—"}</span></Td>
+                <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>#{e.id}</span></Td>
+                <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{e.data}</span></Td>
                 <Td>
+                  <span className="font-medium text-charcoal">{e.fornecedor ?? "—"}</span>
+                  {/* No celular: data e itens embaixo do fornecedor. */}
+                  <div className="md:hidden text-gray-text text-xs mt-0.5">#{e.id} · {e.data}</div>
+                  <div className="md:hidden text-gray-text text-xs">{e.itens} {e.itens === 1 ? "item" : "itens"}: {e.resumo}</div>
+                </Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{e.documento ?? "—"}</span></Td>
+                <Td soDesktop>
                   <div className="text-charcoal text-sm">{e.itens} {e.itens === 1 ? "item" : "itens"}</div>
                   <div className="text-gray-text text-xs truncate" style={{ maxWidth: 360 }}>{e.resumo}</div>
                 </Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{brl(e.total)}</span></Td>
-                <Td><span className="text-gray-text text-sm">{e.usuario}</span></Td>
+                <Td className="text-right"><span className="whitespace-nowrap" style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{brl(e.total)}</span></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{e.usuario}</span></Td>
               </tr>
             ))}
           </tbody>

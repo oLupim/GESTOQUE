@@ -131,15 +131,18 @@ export default function Dashboard({ nome, saudacao, cards, grafico, movimentacoe
         </div>
         <Table>
           <thead>
-            <tr><Th>Produto</Th><Th>Código</Th><Th className="text-right">Atual</Th><Th className="text-right">Mínimo</Th><Th>Status</Th></tr>
+            <tr><Th>Produto</Th><Th soDesktop>Código</Th><Th className="text-right">Atual</Th><Th soDesktop className="text-right">Mínimo</Th><Th>Status</Th></tr>
           </thead>
           <tbody>
             {estoqueBaixo.map((p) => (
               <tr key={p.id} className="hover:bg-cream/40 transition-fast">
                 <Td><span className="font-medium text-charcoal">{p.nome}</span></Td>
-                <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500, color: p.saldo <= 0 ? "#C9281F" : "#171918" }}>{qtd(p.saldo)}</span></Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(p.estoque_minimo)}</span></Td>
+                <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
+                <Td className="text-right">
+                  <span style={{ fontFamily: "var(--font-mono)", fontWeight: 500, color: p.saldo <= 0 ? "#C9281F" : "#171918" }}>{qtd(p.saldo)}</span>
+                  <span className="md:hidden text-gray-text text-xs whitespace-nowrap"> / mín. {qtd(p.estoque_minimo)}</span>
+                </Td>
+                <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(p.estoque_minimo)}</span></Td>
                 <Td><StatusBadge status={p.situacao} /></Td>
               </tr>
             ))}

@@ -56,8 +56,8 @@ export function Card({ children, className = "", onClick }: { children: ReactNod
 
 export function PageHeader({ title, subtitle, children }: { title: string; subtitle?: string; children?: ReactNode }) {
   return (
-    <div className="flex items-start justify-between mb-6">
-      <div>
+    <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+      <div className="min-w-0">
         <h1
           className="text-charcoal leading-tight"
           style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 26, letterSpacing: "0.01em" }}
@@ -70,7 +70,7 @@ export function PageHeader({ title, subtitle, children }: { title: string; subti
           </p>
         )}
       </div>
-      {children && <div className="flex items-center gap-2">{children}</div>}
+      {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
   );
 }
@@ -252,10 +252,13 @@ export function Table({ children, className = "" }: { children: ReactNode; class
   );
 }
 
-export function Th({ children, className = "" }: { children?: ReactNode; className?: string }) {
+// soDesktop: a coluna some no celular (telas menores que 768px) para a tabela caber sem rolar para o lado.
+const SO_DESKTOP = "hidden md:table-cell";
+
+export function Th({ children, className = "", soDesktop = false }: { children?: ReactNode; className?: string; soDesktop?: boolean }) {
   return (
     <th
-      className={`px-4 py-3 text-left text-gray-text font-medium ${className}`}
+      className={`px-3 md:px-4 py-3 text-left text-gray-text font-medium ${soDesktop ? SO_DESKTOP : ""} ${className}`}
       style={{ fontSize: 11.5, letterSpacing: "0.05em", borderBottom: "1px solid #E5E2DA", background: "#F9F7F3" }}
     >
       {children}
@@ -263,10 +266,10 @@ export function Th({ children, className = "" }: { children?: ReactNode; classNa
   );
 }
 
-export function Td({ children, className = "" }: { children?: ReactNode; className?: string }) {
+export function Td({ children, className = "", soDesktop = false }: { children?: ReactNode; className?: string; soDesktop?: boolean }) {
   return (
     <td
-      className={`px-4 py-3.5 text-charcoal ${className}`}
+      className={`px-3 md:px-4 py-3.5 text-charcoal ${soDesktop ? SO_DESKTOP : ""} ${className}`}
       style={{ fontSize: 13.5, borderBottom: "1px solid #F0EDE5" }}
     >
       {children}

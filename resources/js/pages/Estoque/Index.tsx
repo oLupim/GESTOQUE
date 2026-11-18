@@ -63,7 +63,7 @@ function MovModal({ produtos, tipos, produtoInicial, onClose }: { produtos: Prod
         {errors.produto_id && <p className="text-red text-xs mt-1">{errors.produto_id}</p>}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Rotulo>Tipo de movimentação</Rotulo>
           <Select value={data.tipo} onChange={(v) => setData("tipo", v)} className="w-full">
@@ -170,28 +170,36 @@ export default function EstoqueIndex({ produtos, movimentacoes, resumo, tipos }:
           <Table>
             <thead>
               <tr>
-                <Th>Produto</Th><Th>Código</Th><Th>Categoria</Th>
-                <Th className="text-right">Estoque</Th><Th className="text-right">Mínimo</Th>
-                <Th>Última movimentação</Th><Th>Status</Th><Th></Th>
+                <Th>Produto</Th><Th soDesktop>Código</Th><Th soDesktop>Categoria</Th>
+                <Th className="text-right">Estoque</Th><Th soDesktop className="text-right">Mínimo</Th>
+                <Th soDesktop>Última movimentação</Th><Th soDesktop>Status</Th><Th></Th>
               </tr>
             </thead>
             <tbody>
               {filtrados.map((p) => (
                 <tr key={p.id} className="hover:bg-cream/40 transition-fast group">
-                  <Td><span className="font-medium text-charcoal">{p.nome}</span></Td>
-                  <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
-                  <Td><span className="text-gray-text text-sm">{p.categoria ?? "—"}</span></Td>
+                  <Td>
+                    <span className="font-medium text-charcoal">{p.nome}</span>
+                    {/* No celular: código e status embaixo do nome. */}
+                    <div className="md:hidden mt-1 flex items-center gap-2">
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#777A78" }}>{p.codigo}</span>
+                      <StatusBadge status={p.situacao} />
+                    </div>
+                  </Td>
+                  <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
+                  <Td soDesktop><span className="text-gray-text text-sm">{p.categoria ?? "—"}</span></Td>
                   <Td className="text-right">
                     <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: corSituacao[p.situacao] }}>{qtd(p.saldo)}</span>
                     <span className="text-gray-text text-xs ml-1">{p.unidade.toLowerCase()}</span>
                   </Td>
-                  <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(p.estoque_minimo)}</span></Td>
-                  <Td><span className="text-gray-text text-xs">{p.ultima_movimentacao ?? "—"}</span></Td>
-                  <Td><StatusBadge status={p.situacao} /></Td>
+                  <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(p.estoque_minimo)}</span></Td>
+                  <Td soDesktop><span className="text-gray-text text-xs">{p.ultima_movimentacao ?? "—"}</span></Td>
+                  <Td soDesktop><StatusBadge status={p.situacao} /></Td>
                   <Td>
+                    {/* No computador aparece ao passar o mouse; no celular (sem mouse) fica sempre visível. */}
                     <button
                       onClick={() => abrir(p.id)}
-                      className="opacity-0 group-hover:opacity-100 text-gray-text hover:text-charcoal transition-fast text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-cream"
+                      className="md:opacity-0 md:group-hover:opacity-100 whitespace-nowrap text-gray-text hover:text-charcoal transition-fast text-xs flex items-center gap-1 px-2 py-1 rounded hover:bg-cream"
                     >
                       <Plus size={11} /> Movimentar
                     </button>
@@ -208,8 +216,8 @@ export default function EstoqueIndex({ produtos, movimentacoes, resumo, tipos }:
           <Table>
             <thead>
               <tr>
-                <Th>Data</Th><Th>Produto</Th><Th>Tipo</Th><Th>Origem / motivo</Th>
-                <Th className="text-right">Qtd.</Th><Th className="text-right">Anterior</Th><Th className="text-right">Resultante</Th><Th>Usuário</Th>
+                <Th soDesktop>Data</Th><Th>Produto</Th><Th soDesktop>Tipo</Th><Th soDesktop>Origem / motivo</Th>
+                <Th className="text-right">Qtd.</Th><Th soDesktop className="text-right">Anterior</Th><Th soDesktop className="text-right">Resultante</Th><Th soDesktop>Usuário</Th>
               </tr>
             </thead>
             <tbody>
@@ -217,15 +225,20 @@ export default function EstoqueIndex({ produtos, movimentacoes, resumo, tipos }:
                 const cor = m.quantidade > 0 ? "#1A7C4E" : m.tipo.startsWith("AJUSTE") ? "#D4610D" : "#C9281F";
                 return (
                   <tr key={m.id} className="hover:bg-cream/40 transition-fast">
-                    <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{m.data}</span></Td>
-                    <Td><span className="text-charcoal font-medium">{m.produto}</span></Td>
+                    <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{m.data}</span></Td>
                     <Td>
+                      <span className="text-charcoal font-medium">{m.produto}</span>
+                      {/* No celular: data, tipo e origem embaixo do produto. */}
+                      <div className="md:hidden mt-0.5 text-xs text-gray-text">{m.data} · <span style={{ color: cor }}>{m.tipo_label}</span></div>
+                      <div className="md:hidden text-xs text-gray-text">{m.origem}{m.motivo ? ` — ${m.motivo}` : ""}</div>
+                    </Td>
+                    <Td soDesktop>
                       <span className="flex items-center gap-1.5 text-xs" style={{ color: cor }}>
                         {m.quantidade > 0 ? <ArrowUp size={11} /> : <ArrowDown size={11} />}
                         {m.tipo_label}
                       </span>
                     </Td>
-                    <Td>
+                    <Td soDesktop>
                       <div className="text-gray-text text-sm">{m.origem}</div>
                       {m.motivo && <div className="text-gray-muted text-xs">{m.motivo}</div>}
                     </Td>
@@ -234,9 +247,9 @@ export default function EstoqueIndex({ produtos, movimentacoes, resumo, tipos }:
                         {m.quantidade > 0 ? "+" : ""}{qtd(m.quantidade)}
                       </span>
                     </Td>
-                    <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(m.saldo_anterior)}</span></Td>
-                    <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{qtd(m.saldo_posterior)}</span></Td>
-                    <Td><span className="text-gray-text text-sm">{m.usuario}</span></Td>
+                    <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(m.saldo_anterior)}</span></Td>
+                    <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{qtd(m.saldo_posterior)}</span></Td>
+                    <Td soDesktop><span className="text-gray-text text-sm">{m.usuario}</span></Td>
                   </tr>
                 );
               })}
@@ -251,24 +264,27 @@ export default function EstoqueIndex({ produtos, movimentacoes, resumo, tipos }:
           <Table>
             <thead>
               <tr>
-                <Th>Produto</Th><Th>Código</Th><Th className="text-right">Atual</Th>
-                <Th className="text-right">Mínimo</Th><Th className="text-right">Déficit</Th><Th>Status</Th><Th></Th>
+                <Th>Produto</Th><Th soDesktop>Código</Th><Th className="text-right">Atual</Th>
+                <Th soDesktop className="text-right">Mínimo</Th><Th soDesktop className="text-right">Déficit</Th><Th soDesktop>Status</Th><Th></Th>
               </tr>
             </thead>
             <tbody>
               {baixos.map((p) => (
                 <tr key={p.id} className="hover:bg-cream/40 transition-fast">
                   <Td><span className="font-medium text-charcoal">{p.nome}</span></Td>
-                  <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
-                  <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: corSituacao[p.situacao] }}>{qtd(p.saldo)}</span></Td>
-                  <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(p.estoque_minimo)}</span></Td>
+                  <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
                   <Td className="text-right">
+                    <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: corSituacao[p.situacao] }}>{qtd(p.saldo)}</span>
+                    <span className="md:hidden text-gray-text text-xs whitespace-nowrap"> / mín. {qtd(p.estoque_minimo)}</span>
+                  </Td>
+                  <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{qtd(p.estoque_minimo)}</span></Td>
+                  <Td soDesktop className="text-right">
                     <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#C9281F" }}>−{qtd(Math.max(0, p.estoque_minimo - p.saldo))}</span>
                   </Td>
-                  <Td>{p.saldo <= 0 ? <Badge variant="danger">Sem estoque</Badge> : <StatusBadge status={p.situacao} />}</Td>
+                  <Td soDesktop>{p.saldo <= 0 ? <Badge variant="danger">Sem estoque</Badge> : <StatusBadge status={p.situacao} />}</Td>
                   <Td>
                     <Button variant="secondary" size="sm" onClick={() => abrir(p.id)}>
-                      <Plus size={11} /> Registrar entrada
+                      <Plus size={11} /> <span className="hidden sm:inline">Registrar entrada</span><span className="sm:hidden">Entrada</span>
                     </Button>
                   </Td>
                 </tr>

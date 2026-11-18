@@ -53,7 +53,7 @@ export function ClienteForm({ cliente, onClose }: { cliente?: Cliente; onClose: 
       <Campo label="Nome *" erro={errors.nome}>
         <Input value={data.nome} onChange={(v) => setData("nome", v)} placeholder="Nome completo ou razão social" />
       </Campo>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo label="CPF / CNPJ" erro={errors.cpf_cnpj}>
           <Input value={data.cpf_cnpj} onChange={(v) => setData("cpf_cnpj", v)} placeholder="Somente números ou com pontuação" />
         </Campo>
@@ -61,7 +61,7 @@ export function ClienteForm({ cliente, onClose }: { cliente?: Cliente; onClose: 
           <Input value={data.telefone} onChange={(v) => setData("telefone", v)} placeholder="(54) 99999-9999" />
         </Campo>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo label="E-mail" erro={errors.email}>
           <Input value={data.email} onChange={(v) => setData("email", v)} placeholder="cliente@email.com" />
         </Campo>
@@ -112,7 +112,7 @@ export function MotoForm({ clientes, clienteFixo, onClose }: { clientes: { id: n
           </Select>
         </Campo>
       )}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Campo label="Placa *" erro={errors.placa}>
           <Input value={data.placa} onChange={(v) => setData("placa", v.toUpperCase())} placeholder="ABC1D23" />
         </Campo>
@@ -123,7 +123,7 @@ export function MotoForm({ clientes, clienteFixo, onClose }: { clientes: { id: n
           <Input value={data.modelo} onChange={(v) => setData("modelo", v)} placeholder="CG 160 Titan" />
         </Campo>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Campo label="Ano" erro={errors.ano}>
           <Input value={data.ano} onChange={(v) => setData("ano", v)} placeholder="2022" />
         </Campo>

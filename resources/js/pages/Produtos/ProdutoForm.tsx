@@ -61,8 +61,8 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
         <FotoInput onChange={(f) => setData("foto", f)} />
       </Campo>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Campo label="Nome do produto *" erro={errors.nome} className="col-span-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Campo label="Nome do produto *" erro={errors.nome} className="sm:col-span-2">
           <Input placeholder="Ex: Óleo Motul 10W40" value={data.nome} onChange={(v) => setData("nome", v)} />
         </Campo>
         <Campo label="Categoria" erro={errors.categoria}>
@@ -80,7 +80,7 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
       </div>
 
       <Secao titulo="Valores" />
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Campo label="Custo (R$)" erro={errors.preco_custo}>
           <Input placeholder="0,00" value={data.preco_custo} onChange={(v) => setData("preco_custo", v)} />
         </Campo>
@@ -98,7 +98,7 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
       </div>
 
       <Secao titulo="Estoque" />
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Campo label="Qtd. inicial" erro={errors.estoque_inicial}>
           <Input placeholder="0" value={data.estoque_inicial} onChange={(v) => setData("estoque_inicial", v)} />
         </Campo>
@@ -113,7 +113,7 @@ export default function ProdutoForm({ onClose }: { onClose: () => void }) {
       </div>
 
       <Secao titulo="Fiscal (NF-e)" />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo label="NCM" erro={errors.ncm}>
           <Input placeholder="0000.00.00" value={data.ncm} onChange={(v) => setData("ncm", v)} />
         </Campo>

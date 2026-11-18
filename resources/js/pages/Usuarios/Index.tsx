@@ -50,7 +50,7 @@ function UsuarioForm({ usuario, perfis, proprio, onClose }: { usuario?: Usuario;
       <Campo label="Nome *" erro={errors.name}>
         <Input value={data.name} onChange={(v) => setData("name", v)} placeholder="Nome de quem vai usar a conta" />
       </Campo>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo label="E-mail (login) *" erro={errors.email}>
           <Input type="email" value={data.email} onChange={(v) => setData("email", v)} placeholder="pessoa@email.com" />
         </Campo>
@@ -63,7 +63,7 @@ function UsuarioForm({ usuario, perfis, proprio, onClose }: { usuario?: Usuario;
           </Select>
         </Campo>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Campo label={usuario ? "Nova senha" : "Senha *"} erro={errors.password}>
           <Input
             type="password"
@@ -115,7 +115,7 @@ export default function UsuariosIndex({ usuarios, perfis }: Props) {
       <Card>
         <Table>
           <thead>
-            <tr><Th>Nome</Th><Th>E-mail</Th><Th>Perfil</Th><Th>Situação</Th><Th>Criado em</Th><Th></Th></tr>
+            <tr><Th>Nome</Th><Th soDesktop>E-mail</Th><Th soDesktop>Perfil</Th><Th>Situação</Th><Th soDesktop>Criado em</Th><Th></Th></tr>
           </thead>
           <tbody>
             {usuarios.map((u) => (
@@ -123,13 +123,20 @@ export default function UsuariosIndex({ usuarios, perfis }: Props) {
                 <Td>
                   <span className="font-medium text-charcoal">{u.name}</span>
                   {u.id === eu?.id && <span className="text-gray-text text-xs ml-2">(você)</span>}
+                  {/* No celular, e-mail e perfil aparecem aqui embaixo do nome. */}
+                  <div className="md:hidden mt-1 space-y-1">
+                    <div className="text-gray-text text-xs break-all">{u.email}</div>
+                    <Badge variant={u.perfil === "administrador" ? "purple" : "neutral"}>{perfis[u.perfil] ?? u.perfil}</Badge>
+                  </div>
                 </Td>
-                <Td><span className="text-gray-text text-sm">{u.email}</span></Td>
-                <Td><Badge variant={u.perfil === "administrador" ? "purple" : "neutral"}>{perfis[u.perfil] ?? u.perfil}</Badge></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{u.email}</span></Td>
+                <Td soDesktop><Badge variant={u.perfil === "administrador" ? "purple" : "neutral"}>{perfis[u.perfil] ?? u.perfil}</Badge></Td>
                 <Td><Badge variant={u.ativo ? "success" : "danger"}>{u.ativo ? "Ativa" : "Desativada"}</Badge></Td>
-                <Td><span className="text-gray-text text-sm">{u.criado_em ?? "—"}</span></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{u.criado_em ?? "—"}</span></Td>
                 <Td className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => setForm(u.id)}><Pencil size={12} /> Editar</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setForm(u.id)}>
+                    <Pencil size={12} /> <span className="hidden sm:inline">Editar</span>
+                  </Button>
                 </Td>
               </tr>
             ))}

@@ -127,13 +127,13 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
           <thead>
             <tr>
               <Th>Produto</Th>
-              <Th>Código</Th>
-              <Th>Categoria</Th>
-              <Th className="text-right">Custo</Th>
+              <Th soDesktop>Código</Th>
+              <Th soDesktop>Categoria</Th>
+              <Th soDesktop className="text-right">Custo</Th>
               <Th className="text-right">Venda</Th>
-              <Th className="text-right">Margem</Th>
+              <Th soDesktop className="text-right">Margem</Th>
               <Th className="text-right">Estoque</Th>
-              <Th>Status</Th>
+              <Th soDesktop>Status</Th>
             </tr>
           </thead>
           <tbody>
@@ -144,21 +144,26 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
                     <Miniatura produto={p} onClick={() => setFotoDe(p)} />
                     <div>
                       <div className="text-charcoal font-medium" style={{ fontSize: 13.5 }}>{p.nome}</div>
-                      <div className="text-gray-text" style={{ fontSize: 11.5 }}>{p.marca ?? "—"}</div>
+                      <div className="text-gray-text" style={{ fontSize: 11.5 }}>
+                        {/* No celular, o código aparece junto da marca. */}
+                        <span className="md:hidden" style={{ fontFamily: "var(--font-mono)" }}>{p.codigo} · </span>
+                        {p.marca ?? "—"}
+                      </div>
+                      <div className="md:hidden mt-1"><StatusBadge status={p.situacao} /></div>
                     </div>
                   </div>
                 </Td>
-                <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
-                <Td><span className="text-gray-text" style={{ fontSize: 13 }}>{p.categoria ?? "—"}</span></Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{p.preco_custo > 0 ? brl(p.preco_custo) : "—"}</span></Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontWeight: 500, fontSize: 13 }}>{brl(p.preco_venda)}</span></Td>
-                <Td className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#1A7C4E" }}>{margem(p)}</span></Td>
+                <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{p.codigo}</span></Td>
+                <Td soDesktop><span className="text-gray-text" style={{ fontSize: 13 }}>{p.categoria ?? "—"}</span></Td>
+                <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{p.preco_custo > 0 ? brl(p.preco_custo) : "—"}</span></Td>
+                <Td className="text-right"><span className="whitespace-nowrap" style={{ fontFamily: "var(--font-mono)", fontWeight: 500, fontSize: 13 }}>{brl(p.preco_venda)}</span></Td>
+                <Td soDesktop className="text-right"><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#1A7C4E" }}>{margem(p)}</span></Td>
                 <Td className="text-right">
-                  <span style={{ fontFamily: "var(--font-mono)", fontWeight: 500, color: p.saldo === 0 ? "#C9281F" : "#171918" }}>
+                  <span className="whitespace-nowrap" style={{ fontFamily: "var(--font-mono)", fontWeight: 500, color: p.saldo === 0 ? "#C9281F" : "#171918" }}>
                     {qtd(p.saldo)} {p.unidade.toLowerCase()}
                   </span>
                 </Td>
-                <Td><StatusBadge status={p.situacao} /></Td>
+                <Td soDesktop><StatusBadge status={p.situacao} /></Td>
               </tr>
             ))}
           </tbody>

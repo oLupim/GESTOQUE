@@ -63,30 +63,36 @@ export default function VendasIndex({ vendas, resumo }: Props) {
         <Table>
           <thead>
             <tr>
-              <Th>#</Th><Th>Data</Th><Th>Produtos</Th><Th>Pagamento</Th>
-              <Th className="text-right">Total</Th><Th>Status</Th><Th>Usuário</Th><Th></Th>
+              <Th soDesktop>#</Th><Th soDesktop>Data</Th><Th>Produtos</Th><Th soDesktop>Pagamento</Th>
+              <Th className="text-right">Total</Th><Th soDesktop>Status</Th><Th soDesktop>Usuário</Th><Th></Th>
             </tr>
           </thead>
           <tbody>
             {vendas.map((v) => (
               <tr key={v.id} className="hover:bg-cream/40 transition-fast">
-                <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>#{v.id}</span></Td>
-                <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{v.data}</span></Td>
+                <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>#{v.id}</span></Td>
+                <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{v.data}</span></Td>
                 <Td>
+                  {/* No celular: número, data, pagamento e status junto dos produtos. */}
+                  <div className="md:hidden text-gray-text text-xs" style={{ fontFamily: "var(--font-mono)" }}>#{v.id} · {v.data}</div>
                   <div className="text-charcoal text-sm">{v.itens} {v.itens === 1 ? "item" : "itens"}</div>
                   <div className="text-gray-text text-xs truncate" style={{ maxWidth: 320 }}>{v.resumo}</div>
+                  <div className="md:hidden mt-1 flex flex-wrap items-center gap-2">
+                    <StatusBadge status={v.status} />
+                    <span className="text-gray-text text-xs">{v.forma}</span>
+                  </div>
                 </Td>
-                <Td><span className="text-gray-text text-sm">{v.forma}</span></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{v.forma}</span></Td>
                 <Td className="text-right">
-                  <span style={{ fontFamily: "var(--font-mono)", fontWeight: 500, textDecoration: v.status === "Cancelada" ? "line-through" : undefined }}>
+                  <span className="whitespace-nowrap" style={{ fontFamily: "var(--font-mono)", fontWeight: 500, textDecoration: v.status === "Cancelada" ? "line-through" : undefined }}>
                     {brl(v.total)}
                   </span>
                 </Td>
-                <Td>
+                <Td soDesktop>
                   <StatusBadge status={v.status} />
                   {v.motivo_cancelamento && <div className="text-gray-text text-xs mt-1">{v.motivo_cancelamento}</div>}
                 </Td>
-                <Td><span className="text-gray-text text-sm">{v.usuario}</span></Td>
+                <Td soDesktop><span className="text-gray-text text-sm">{v.usuario}</span></Td>
                 <Td>
                   {v.status === "Concluída" && (
                     <button onClick={() => setCancelando(v)} className="text-xs font-medium text-red hover:underline">Cancelar</button>

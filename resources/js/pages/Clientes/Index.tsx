@@ -103,14 +103,18 @@ export default function ClientesIndex({ clientes }: { clientes: Cliente[] }) {
       <Card>
         <Table>
           <thead>
-            <tr><Th>Cliente</Th><Th>Telefone</Th><Th>CPF / CNPJ</Th><Th className="text-right">Motos</Th><Th></Th></tr>
+            <tr><Th>Cliente</Th><Th soDesktop>Telefone</Th><Th soDesktop>CPF / CNPJ</Th><Th className="text-right">Motos</Th><Th></Th></tr>
           </thead>
           <tbody>
             {filtrados.map((c) => (
               <tr key={c.id} className="hover:bg-cream/40 transition-fast cursor-pointer" onClick={() => setAbertoId(c.id)}>
-                <Td><span className="font-medium text-charcoal">{c.nome}</span></Td>
-                <Td><span className="flex items-center gap-1.5 text-gray-text text-sm"><Phone size={12} />{formatarTelefone(c.telefone)}</span></Td>
-                <Td><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{formatarDoc(c.cpf_cnpj)}</span></Td>
+                <Td>
+                  <span className="font-medium text-charcoal">{c.nome}</span>
+                  {/* No celular, o telefone aparece embaixo do nome. */}
+                  <span className="md:hidden flex items-center gap-1.5 text-gray-text text-xs mt-0.5"><Phone size={11} />{formatarTelefone(c.telefone)}</span>
+                </Td>
+                <Td soDesktop><span className="flex items-center gap-1.5 text-gray-text text-sm"><Phone size={12} />{formatarTelefone(c.telefone)}</span></Td>
+                <Td soDesktop><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#777A78" }}>{formatarDoc(c.cpf_cnpj)}</span></Td>
                 <Td className="text-right"><span className="inline-flex items-center gap-1 text-gray-text text-sm"><Bike size={12} />{c.motos.length}</span></Td>
                 <Td><ChevronRight size={14} className="text-gray-text" /></Td>
               </tr>

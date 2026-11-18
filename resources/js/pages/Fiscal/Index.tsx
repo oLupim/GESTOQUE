@@ -75,12 +75,13 @@ export default function Fiscal({ documentos, contagem, filtro, config }: Props) 
           <table className="w-full text-sm">
             <thead className="bg-neutral-50 text-left text-xs uppercase text-neutral-500">
               <tr>
-                <th className="px-4 py-3">Data</th>
-                <th className="px-4 py-3">Venda</th>
-                <th className="px-4 py-3">Nota</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Total</th>
-                <th className="px-4 py-3 text-right">Ações</th>
+                {/* hidden md:table-cell = coluna só no computador; no celular a info vai na coluna Nota. */}
+                <th className="hidden md:table-cell px-4 py-3">Data</th>
+                <th className="hidden md:table-cell px-4 py-3">Venda</th>
+                <th className="px-3 md:px-4 py-3">Nota</th>
+                <th className="hidden md:table-cell px-4 py-3">Status</th>
+                <th className="hidden md:table-cell px-4 py-3 text-right">Total</th>
+                <th className="px-3 md:px-4 py-3 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -95,22 +96,26 @@ export default function Fiscal({ documentos, contagem, filtro, config }: Props) 
                 const s = STATUS[d.status] ?? { rotulo: d.status, cor: 'bg-neutral-100' };
                 return (
                   <tr key={d.id} className="align-top">
-                    <td className="px-4 py-3 whitespace-nowrap">{d.data}</td>
-                    <td className="px-4 py-3">#{d.venda_id}</td>
-                    <td className="px-4 py-3">
+                    <td className="hidden md:table-cell px-4 py-3 whitespace-nowrap">{d.data}</td>
+                    <td className="hidden md:table-cell px-4 py-3">#{d.venda_id}</td>
+                    <td className="px-3 md:px-4 py-3">
                       <div>{d.modelo === 65 ? 'NFC-e' : 'NF-e'} {d.numero ? `nº ${d.numero}/${d.serie}` : '—'}</div>
+                      <div className="md:hidden mt-0.5 text-xs text-neutral-500">{d.data} · venda #{d.venda_id} · {brl(d.total)}</div>
+                      <div className="md:hidden mt-1">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${s.cor}`}>{s.rotulo}</span>
+                      </div>
                       {d.chave && <div className="font-mono text-xs text-neutral-500 break-all">{d.chave}</div>}
                       {d.mensagem && d.status !== 'autorizada' && (
                         <div className="mt-1 text-xs text-[#C9281F]">{d.mensagem}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="hidden md:table-cell px-4 py-3">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${s.cor}`}>{s.rotulo}</span>
                       {d.tentativas > 1 && <div className="mt-1 text-xs text-neutral-500">{d.tentativas} tentativas</div>}
                     </td>
-                    <td className="px-4 py-3 text-right">{brl(d.total)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
+                    <td className="hidden md:table-cell px-4 py-3 text-right">{brl(d.total)}</td>
+                    <td className="px-3 md:px-4 py-3">
+                      <div className="flex flex-wrap justify-end gap-2">
                         {d.tem_pdf && <a href={`/fiscal/${d.id}/pdf`} className="rounded border border-neutral-300 px-2 py-1 text-xs">DANFE</a>}
                         {d.tem_xml && <a href={`/fiscal/${d.id}/xml`} className="rounded border border-neutral-300 px-2 py-1 text-xs">XML</a>}
                         {d.pode_enviar && (
