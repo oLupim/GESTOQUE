@@ -1,7 +1,7 @@
 import { Link, usePage } from "@inertiajs/react";
 import {
   LayoutDashboard, ShoppingCart, Package, Boxes, ArrowDownUp,
-  Wrench, Users, Bike, FileText, BarChart2, Settings, LogOut, Bell, ChevronRight,
+  Wrench, Users, Bike, FileText, BarChart2, Settings, LogOut, Bell, ChevronRight, UserCog,
 } from "lucide-react";
 import type { ElementType } from "react";
 import { FotoEmpresa, useUsuario } from '@/components/Marca';
@@ -23,6 +23,11 @@ const nav: Item[] = [
 
 const extras: Item[] = [
   { href: "/configuracoes", label: "Configurações", icon: Settings },
+];
+
+// Só aparece para administrador (a rota também bloqueia os outros perfis).
+const extrasAdmin: Item[] = [
+  { href: "/usuarios", label: "Usuários", icon: UserCog },
 ];
 
 function NavLink({ item, active, onClick }: { item: Item; active: boolean; onClick: () => void }) {
@@ -78,7 +83,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
             <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={onMobileClose} />
           ))}
           <div className="my-3 mx-1" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
-          {extras.map((item) => (
+          {[...(usuario?.perfil === "administrador" ? extrasAdmin : []), ...extras].map((item) => (
             <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={onMobileClose} />
           ))}
         </nav>

@@ -13,6 +13,18 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /** Perfis de acesso e seus nomes na tela. */
+    public const PERFIS = [
+        'administrador' => 'Administrador',
+        'balconista' => 'Balconista',
+        'mecanico' => 'Mecânico',
+    ];
+
+    public function isAdministrador(): bool
+    {
+        return $this->perfil === 'administrador';
+    }
+
     /**
      * The attributes that are mass assignable.
      *

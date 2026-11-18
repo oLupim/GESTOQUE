@@ -10,6 +10,8 @@ use App\Fiscal\BrasilNfeEmissor;
 use App\Fiscal\EmissorFiscal;
 use App\Models\OrdemServico;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,6 +32,9 @@ class AppServiceProvider extends ServiceProvider
         if (app()->isProduction()) {
             URL::forceScheme('https');
         }
+
+        // Só administrador gerencia as contas de acesso.
+        Gate::define('administrar', fn (User $user) => $user->isAdministrador());
 
         Relation::morphMap([
             'entrada' => Entrada::class,

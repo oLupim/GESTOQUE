@@ -51,8 +51,10 @@ No ambiente (environment) `main`, abra **Settings** (Configurações) → **Depl
 - **Comando de deploy** (roda a cada publicação, já com o banco ligado):
 
   ```
-  php artisan migrate --force
+  php artisan migrate --force && php artisan gestoque:admin-padrao
   ```
+
+  O segundo comando cria o administrador padrão (passo 6) **só se ainda não existir nenhum administrador**. Nos deploys seguintes ele não faz nada, então pode ficar aí para sempre.
 
 > Não coloque `php artisan db:seed` aqui. O seeder cria usuários de teste com senha `password` e, por segurança, ele se recusa a rodar em produção.
 
@@ -95,9 +97,13 @@ OFICINA_NOME="Nome da oficina"
 OFICINA_WHATSAPP=55DDDNUMERO
 OFICINA_ENDERECO="Cidade/UF"
 IMAGENS_DISK=imagens
+ADMIN_NOME="Nome do Dono"
+ADMIN_EMAIL=email@exemplo.com
+ADMIN_SENHA=UmaSenhaForte123
 ```
 
 Observações:
+- `ADMIN_*` é o **administrador padrão**: a primeira conta, criada no deploy. A senha precisa ter pelo menos 8 caracteres. Ela fica só aqui no painel do Cloud, nunca no GitHub.
 - **`APP_DEBUG=false` é obrigatório.** Com `true`, uma página de erro mostraria detalhes internos do sistema para qualquer pessoa.
 - `APP_KEY` é gerada pelo Cloud. Não troque depois que o sistema estiver em uso: as senhas continuam funcionando, mas o token da Brasil NFe (criptografado com essa chave) deixa de abrir.
 - Confira se `APP_URL` está com o endereço `https://...` do app. Se estiver vazio ou diferente, defina com o endereço que aparece no topo do painel.
@@ -113,25 +119,33 @@ Para não ter surpresa na fatura:
 2. Defina um **limite de gastos** (spend limit) mensal, por exemplo o valor do plano mais uma pequena margem.
 3. Ative os avisos por e-mail quando o uso chegar perto do limite.
 
-## 8. Criar a conta do dono da oficina
+## 8. Contas de acesso
 
-O sistema não tem cadastro público. A conta é criada por comando:
+O sistema não tem cadastro público: ninguém de fora consegue criar conta.
 
-1. No ambiente, abra a aba **Commands** (Comandos).
-2. Rode (troque pelos dados reais):
+**Primeira conta (administrador padrão).** Ela é criada sozinha no primeiro deploy, com os dados de `ADMIN_*` do passo 6. Se o deploy já tinha rodado antes de você definir essas variáveis, clique em **Deploy** de novo.
 
-   ```
-   php artisan gestoque:usuario --nome="Nome do Dono" --email="email@exemplo.com" --senha="UmaSenhaForte123"
-   ```
+Depois do primeiro login:
+1. Troque a senha em **Configurações → Senha**.
+2. Apague a variável `ADMIN_SENHA` do painel; ela não é mais necessária.
 
-3. Como o comando fica registrado no histórico do painel, **depois do primeiro login troque a senha** em **Configurações → Senha**.
+**Contas de funcionários.** Entre como administrador e abra **Usuários** no menu:
+- **Novo usuário:** nome, e-mail, perfil (Administrador, Balconista ou Mecânico) e senha.
+- **Editar:** troca de dados, perfil ou senha (senha em branco mantém a atual).
+- **Desativar:** desmarque "Conta ativa". A pessoa é desconectada na hora e não consegue mais entrar. Contas não são excluídas porque vendas e movimentações guardam quem fez cada operação.
+
+> Todos os perfis enxergam os mesmos dados da oficina; só o administrador vê o menu **Usuários**.
+
+**Plano B (sem variáveis):** na aba **Commands** do ambiente, rode
+`php artisan gestoque:usuario --nome="..." --email="..." --senha="..."` e depois troque a senha pela tela.
 
 ## 9. Checklist depois do deploy
 
 Abra o endereço do app e confira, nesta ordem:
 
 - [ ] `https://SEU-APP/up` responde (página de "Application up").
-- [ ] **Login** com a conta criada no passo 8.
+- [ ] **Login** com o administrador padrão (`ADMIN_EMAIL` / `ADMIN_SENHA`).
+- [ ] **Usuários:** criar uma conta de balconista, entrar com ela numa janela anônima e conferir que o menu **Usuários** não aparece.
 - [ ] **Configurações → Empresa:** salvar o nome e enviar um logo. O logo aparece no menu e no canto superior direito (vem do bucket `imagens`).
 - [ ] **Produtos:** cadastrar um produto.
 - [ ] **Entradas:** dar entrada no estoque desse produto.

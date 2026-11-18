@@ -15,6 +15,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\RelatorioController;
+use App\Http\Controllers\UsuarioController;
 
 
 // Pública: clientes veem as peças disponíveis sem login.
@@ -76,6 +77,13 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::put('/configuracoes/senha', [ConfiguracaoController::class, 'senha']);
         Route::put('/configuracoes/fiscal', [ConfiguracaoController::class, 'fiscal']);
         Route::post('/configuracoes/empresa', [ConfiguracaoController::class, 'empresa']);
+
+        // Contas de acesso: só administrador.
+        Route::middleware('can:administrar')->group(function () {
+            Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+            Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+            Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
+        });
         
         Route::get('/fiscal', [FiscalController::class, 'index']);
         Route::get('/fiscal/{documento}/{tipo}', [FiscalController::class, 'arquivo'])->whereIn('tipo', ['xml', 'pdf']);
