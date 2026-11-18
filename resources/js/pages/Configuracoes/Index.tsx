@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent, ReactNode } from 'react';
+import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import AppLayout from '@/layouts/AppLayout';
+import { useUsuario } from '@/components/Marca';
 
 type Props = {
   perfil: { name: string; email: string };
@@ -40,6 +41,46 @@ function Cartao({ titulo, descricao, children }: { titulo: string; descricao: st
 }
 
 export default function Configuracoes({ perfil, fiscal }: Props) {
+  const usuario = useUsuario();
+  const e = useForm<{ empresa: string; foto: File | null; remover_foto: boolean }>({
+    empresa: usuario?.empresa ?? '',
+    foto: null,
+    remover_foto: false,
+  });
+  // Prévia local do arquivo escolhido, antes de enviar.
+  const [previaLocal, setPreviaLocal] = useState<string | null>(null);
+  // Muda a key do input de arquivo para limpá-lo depois de salvar/remover.
+  const [inputKey, setInputKey] = useState(0);
+
+  useEffect(() => {
+    if (!e.data.foto) {
+      setPreviaLocal(null);
+      return;
+    }
+    const url = URL.createObjectURL(e.data.foto);
+    setPreviaLocal(url);
+    return () => URL.revokeObjectURL(url);
+  }, [e.data.foto]);
+
+  const previa = previaLocal ?? (e.data.remover_foto ? null : usuario?.foto_url ?? null);
+  const inicial = (e.data.empresa || usuario?.name || 'G').trim().charAt(0).toUpperCase();
+
+  const removerFoto = () => {
+    e.setData((d) => ({ ...d, foto: null, remover_foto: true }));
+    setInputKey((k) => k + 1);
+  };
+  const salvarEmpresa = (ev: FormEvent) => {
+    ev.preventDefault();
+    e.post('/configuracoes/empresa', {
+      forceFormData: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        e.setData((d) => ({ ...d, foto: null, remover_foto: false }));
+        setInputKey((k) => k + 1);
+      },
+    });
+  };
+
   const p = useForm({ name: perfil.name, email: perfil.email });
   const s = useForm({ senha_atual: '', password: '', password_confirmation: '' });
   const f = useForm({
@@ -69,6 +110,40 @@ export default function Configuracoes({ perfil, fiscal }: Props) {
     <Head title="Configurações" />
       <div className="mx-auto max-w-3xl space-y-6">
         <h1 className="text-2xl font-bold">Configurações</h1>
+
+        <Cartao titulo="Empresa" descricao="Nome e logo exibidos no menu e no topo do sistema.">
+          <form onSubmit={salvarEmpresa} className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-4 sm:col-span-2">
+              {previa ? (
+                <img src={previa} alt="Logo da empresa" className="h-20 w-20 rounded border border-neutral-200 bg-white object-cover" />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded text-3xl font-bold text-white" style={{ background: '#C9281F' }}>
+                  {inicial}
+                </div>
+              )}
+              {previa && (
+                <button type="button" onClick={removerFoto} className="text-sm font-medium text-[#C9281F] hover:underline">
+                  Remover foto
+                </button>
+              )}
+            </div>
+            <Campo label="Nome da empresa" erro={e.errors.empresa}>
+              <input className={campo} value={e.data.empresa} onChange={(ev) => e.setData('empresa', ev.target.value)} />
+            </Campo>
+            <Campo label="Logo (JPG, PNG ou WEBP, até 2 MB)" erro={e.errors.foto}>
+              <input
+                key={inputKey}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className={campo}
+                onChange={(ev) => e.setData((d) => ({ ...d, foto: ev.target.files?.[0] ?? null, remover_foto: false }))}
+              />
+            </Campo>
+            <div className="sm:col-span-2">
+              <button className={botao} disabled={e.processing}>Salvar empresa</button>
+            </div>
+          </form>
+        </Cartao>
 
         <Cartao titulo="Minha conta" descricao="Nome e e-mail usados no login.">
           <form onSubmit={salvarPerfil} className="grid gap-4 sm:grid-cols-2">

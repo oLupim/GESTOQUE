@@ -4,6 +4,7 @@ import {
   Wrench, Users, Bike, FileText, BarChart2, Settings, LogOut, Bell, ChevronRight,
 } from "lucide-react";
 import type { ElementType } from "react";
+import { FotoEmpresa, useUsuario } from '@/components/Marca';
 
 type Item = { href: string; label: string; icon: ElementType };
 
@@ -45,6 +46,7 @@ function NavLink({ item, active, onClick }: { item: Item; active: boolean; onCli
 export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boolean; onMobileClose: () => void }) {
   const { url } = usePage();
   const { auth } = usePage<{ auth: { user: { name: string; perfil: string } | null } }>().props;
+  const usuario = useUsuario();
   const nome = auth.user?.name ?? "";
   const perfis: Record<string, string> = { administrador: "Administrador", balconista: "Balconista", mecanico: "Mecânico" };
   const isActive = (href: string) => url === href || url.startsWith(`${href}/`) || url.startsWith(`${href}?`);
@@ -61,17 +63,12 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
       >
         <div className="px-5 pt-6 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-white font-bold"
-              style={{ background: "#C9281F", fontFamily: "var(--font-condensed)", fontSize: 14 }}
-            >
-              {nome.charAt(0).toUpperCase()}
-            </div>
-            <div>
+            <FotoEmpresa tamanho={32} />
+            <div className="min-w-0">
               <div className="text-white leading-none" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 17, letterSpacing: "0.06em" }}>
                 GESTOQUE
               </div>
-              <div className="mt-0.5" style={{ color: "#777A78", fontSize: 10 }}>Lupim Moto Mecânica</div>
+              <div className="mt-0.5 truncate" style={{ color: "#777A78", fontSize: 10 }}>{usuario?.empresa}</div>
             </div>
           </div>
         </div>
@@ -88,12 +85,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boo
 
         <div className="px-4 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-semibold"
-              style={{ background: "#C9281F", fontFamily: "var(--font-condensed)" }}
-            >
-              {nome.charAt(0).toUpperCase()}
-            </div>
+            <FotoEmpresa tamanho={32} redonda />
             <div className="flex-1 min-w-0">
               <div className="text-white text-sm font-medium truncate">{nome}</div>
               <div className="text-xs truncate" style={{ color: "#777A78" }}>{perfis[auth.user?.perfil ?? ""] ?? ""}</div>

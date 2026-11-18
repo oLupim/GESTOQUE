@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 class ConfiguracaoController extends Controller
 {
@@ -75,4 +76,37 @@ class ConfiguracaoController extends Controller
 
         return back()->with('success', 'Configuração fiscal salva.');
     }
+
+        public function empresa(Request $request)
+    {
+        $dados = $request->validate([
+            'empresa' => ['required', 'string', 'max:100'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remover_foto' => ['boolean'],
+        ], [
+            'foto.image' => 'Envie uma imagem (JPG, PNG ou WEBP).',
+            'foto.mimes' => 'Envie uma imagem (JPG, PNG ou WEBP).',
+            'foto.max' => 'A imagem pode ter no máximo 2 MB.',
+        ], ['empresa' => 'nome da empresa']);
+
+        $user = $request->user();
+        $disco = Storage::disk('public');
+
+        if ($request->hasFile('foto') || $request->boolean('remover_foto')) {
+            // Apaga o logo antigo para não acumular arquivos.
+            if ($user->foto_path) {
+                $disco->delete($user->foto_path);
+            }
+
+            $user->foto_path = $request->hasFile('foto')
+                ? $request->file('foto')->store('logos', 'public')
+                : null;
+        }
+
+        $user->empresa = $dados['empresa'];
+        $user->save();
+
+        return back()->with('success', 'Dados da empresa atualizados.');
+    }
 }
+

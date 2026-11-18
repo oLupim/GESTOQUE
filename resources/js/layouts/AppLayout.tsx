@@ -2,6 +2,7 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Menu, Plus, Wrench, CheckCircle, AlertTriangle, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
+import { FotoEmpresa } from '@/components/Marca';
 
 export default function AppLayout({ title, children }: { title: string; children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -62,12 +63,7 @@ export default function AppLayout({ title, children }: { title: string; children
               >
                 Ver catálogo
               </a>
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ background: "#C9281F", fontFamily: "var(--font-condensed)" }}
-              >
-                G
-              </div>
+              <FotoEmpresa tamanho={28} redonda />
             </div>
           </header>
 

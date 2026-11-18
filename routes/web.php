@@ -75,7 +75,8 @@ Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
         Route::put('/configuracoes/perfil', [ConfiguracaoController::class, 'perfil']);
         Route::put('/configuracoes/senha', [ConfiguracaoController::class, 'senha']);
         Route::put('/configuracoes/fiscal', [ConfiguracaoController::class, 'fiscal']);
-
+        Route::post('/configuracoes/empresa', [ConfiguracaoController::class, 'empresa']);
+        
         Route::get('/fiscal', [FiscalController::class, 'index']);
         Route::get('/fiscal/{documento}/{tipo}', [FiscalController::class, 'arquivo'])->whereIn('tipo', ['xml', 'pdf']);
         Route::post('/vendas/{venda}/nfce', [FiscalController::class, 'emitir'])->middleware('throttle:10,1');

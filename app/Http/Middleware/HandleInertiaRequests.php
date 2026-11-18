@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Support\Facades\Storage;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,7 +40,13 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => fn () => $request->user()?->only('id', 'name', 'email', 'perfil'),
+                'user' => fn () => $request->user() ? [
+                    ...$request->user()->only('id', 'name', 'email', 'perfil'),
+                    'empresa' => $request->user()->empresa ?: config('gestoque.oficina'),
+                    'foto_url' => $request->user()->foto_path
+                        ? Storage::disk('public')->url($request->user()->foto_path)
+                        : null,
+                ] : null,
             ],
             
             'flash' => [
