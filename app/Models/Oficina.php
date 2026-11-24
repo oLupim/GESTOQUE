@@ -33,6 +33,12 @@ class Oficina extends Model
             : null;
     }
 
+    /** Muda quando o logo muda: vai no endereço do ícone para o celular não ficar com o antigo guardado. */
+    public function versaoIcone(): string
+    {
+        return substr(md5($this->logo_path ?? 'gestoque'), 0, 8);
+    }
+
     /** Formato enviado para as telas (menu, topo, configurações e catálogo). */
     public function paraTela(): array
     {

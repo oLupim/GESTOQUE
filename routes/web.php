@@ -3,6 +3,7 @@
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\IconeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\VendaController;
@@ -20,6 +21,9 @@ use App\Http\Controllers\UsuarioController;
 
 // Pública: clientes veem as peças disponíveis sem login.
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogo');
+
+// Pública: ícone da tela inicial do celular (logo da oficina ou "G" do Gestoque).
+Route::get('/icone/{tamanho}.png', [IconeController::class, 'show'])->whereNumber('tamanho')->name('icone');
 
    Route::middleware('guest')->group(function () {
        Route::get('/login', [LoginController::class, 'create'])->name('login');
