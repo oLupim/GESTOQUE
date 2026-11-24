@@ -4,11 +4,13 @@ import { Plus, Search, Trash2, Wrench, Clock, Package, CheckCircle } from "lucid
 import AppLayout from "@/layouts/AppLayout";
 import { PageHeader, Button, Input, Select, Card, StatCard, Table, Th, Td, StatusBadge, Modal } from "@/components/ui";
 import { formatarPlaca } from "@/components/Cadastros";
+import Autocompletar, { contem } from "@/components/Autocompletar";
 
 type Ordem = { id: number; data: string; cliente: string; moto: string; placa: string; servico: string; mecanico: string; total: number; status: string };
 type ClienteOS = { id: number; nome: string; motos: { id: number; descricao: string; km_atual: number }[] };
 type ProdutoOS = { id: number; nome: string; codigo: string; unidade: string; saldo: number; preco_venda: number };
-type Props = { ordens: Ordem[]; contagem: Record<string, number>; clientes: ClienteOS[]; produtos: ProdutoOS[] };
+export type TipoServico = { codigo: string; nome: string; categoria: string | null; valor_sugerido: number | null };
+type Props = { ordens: Ordem[]; contagem: Record<string, number>; clientes: ClienteOS[]; produtos: ProdutoOS[]; tiposServico: TipoServico[] };
 
 const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 const num = (v: string) => parseFloat(v.replace(/\./g, "").replace(",", ".")) || 0;
@@ -23,7 +25,34 @@ function Campo({ label, erro, children, className = "" }: { label: string; erro?
   );
 }
 
-function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; produtos: ProdutoOS[]; onClose: () => void }) {
+/** Descrição do serviço com sugestões da lista de serviços padrão (busca pelo nome, código ou categoria). */
+export function CampoServico({ value, onChange, tipos, onEscolher, className = "", placeholder = "Descrição do serviço" }: {
+  value: string; onChange: (v: string) => void; tipos: TipoServico[]; onEscolher: (t: TipoServico) => void; className?: string; placeholder?: string;
+}) {
+  const filtrados = tipos.filter((t) => t.nome !== value && (contem(t.nome, value) || contem(t.codigo, value) || contem(t.categoria, value)));
+  return (
+    <Autocompletar
+      className={className}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      sugestoes={filtrados}
+      chave={(t) => t.codigo}
+      onEscolher={onEscolher}
+      renderItem={(t) => (
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-charcoal text-sm truncate">{t.nome}</div>
+            <div className="text-gray-text text-xs"><span style={{ fontFamily: "var(--font-mono)" }}>{t.codigo}</span>{t.categoria ? ` · ${t.categoria}` : ""}</div>
+          </div>
+          {t.valor_sugerido !== null && <span className="text-sm whitespace-nowrap flex-shrink-0" style={{ fontFamily: "var(--font-mono)" }}>{brl(t.valor_sugerido)}</span>}
+        </div>
+      )}
+    />
+  );
+}
+
+function NovoServico({ clientes, produtos, tiposServico, onClose }: { clientes: ClienteOS[]; produtos: ProdutoOS[]; tiposServico: TipoServico[]; onClose: () => void }) {
   const [busca, setBusca] = useState("");
   const { data, setData, post, processing, errors } = useForm<{
     cliente_id: string; motocicleta_id: string; km_entrada: string; problema: string;
@@ -96,7 +125,18 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
       <div className="pt-1" style={{ borderTop: "1px solid #F0EDE5" }}>
         <div className="text-xs font-semibold text-gray-text uppercase mb-3 mt-3" style={{ letterSpacing: "0.07em" }}>Mão de obra</div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Input className="sm:col-span-2" placeholder="Descrição do serviço" value={data.descricao_servico} onChange={(v) => setData("descricao_servico", v)} />
+          <CampoServico
+            className="sm:col-span-2"
+            value={data.descricao_servico}
+            onChange={(v) => setData("descricao_servico", v)}
+            tipos={tiposServico}
+            onEscolher={(t) => setData((d) => ({
+              ...d,
+              descricao_servico: t.nome,
+              // Valor sugerido só entra se ainda não houver valor digitado.
+              valor_mao_obra: !d.valor_mao_obra && t.valor_sugerido ? t.valor_sugerido.toFixed(2).replace(".", ",") : d.valor_mao_obra,
+            }))}
+          />
           <Input placeholder="R$ 0,00" value={data.valor_mao_obra} onChange={(v) => setData("valor_mao_obra", v)} />
         </div>
         {errors.valor_mao_obra && <p className="text-red text-xs mt-1">{errors.valor_mao_obra}</p>}
@@ -162,7 +202,7 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
   );
 }
 
-export default function ServicosIndex({ ordens, contagem, clientes, produtos }: Props) {
+export default function ServicosIndex({ ordens, contagem, clientes, produtos, tiposServico }: Props) {
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("");
   const [novo, setNovo] = useState(false);
@@ -226,7 +266,7 @@ export default function ServicosIndex({ ordens, contagem, clientes, produtos }: 
 
       {novo && (
         <Modal title="Novo serviço" onClose={() => setNovo(false)} width="max-w-2xl">
-          <NovoServico clientes={clientes} produtos={produtos} onClose={() => setNovo(false)} />
+          <NovoServico clientes={clientes} produtos={produtos} tiposServico={tiposServico} onClose={() => setNovo(false)} />
         </Modal>
       )}
     </AppLayout>

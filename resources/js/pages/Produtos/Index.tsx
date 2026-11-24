@@ -4,11 +4,11 @@ import { Plus, Search, Camera, Pencil } from "lucide-react";
 import AppLayout from "@/layouts/AppLayout";
 import { PageHeader, Button, Input, Select, Card, Table, Th, Td, StatusBadge, Modal, Badge } from "@/components/ui";
 import FotoInput from "@/components/FotoInput";
-import ProdutoForm, { type ProdutoEditavel } from "./ProdutoForm";
+import ProdutoForm, { type ProdutoEditavel, type CategoriaPadrao } from "./ProdutoForm";
 
 type Produto = ProdutoEditavel & { situacao: string };
 
-type Props = { produtos: Produto[]; categorias: string[]; marcas: string[] };
+type Props = { produtos: Produto[]; categorias: string[]; marcas: string[]; categoriasPadrao: CategoriaPadrao[] };
 
 /** Janela para tirar, trocar ou remover a foto de um produto já cadastrado. */
 function FotoProduto({ produto, onClose }: { produto: Produto; onClose: () => void }) {
@@ -66,7 +66,8 @@ const brl = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", c
 const qtd = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 3 });
 const margem = (p: Produto) => (p.preco_custo > 0 ? `${(((p.preco_venda - p.preco_custo) / p.preco_venda) * 100).toFixed(0)}%` : "—");
 
-export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
+export default function ProdutosIndex({ produtos, categorias, marcas, categoriasPadrao }: Props) {
+  const sugestoes = { categoriasPadrao, categorias, marcas, produtos };
   const [busca, setBusca] = useState("");
   const [categoria, setCategoria] = useState("");
   const [marca, setMarca] = useState("");
@@ -173,13 +174,13 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
 
       {novo && (
         <Modal title="Novo produto" onClose={() => setNovo(false)} width="max-w-2xl">
-          <ProdutoForm onClose={() => setNovo(false)} />
+          <ProdutoForm sugestoes={sugestoes} onClose={() => setNovo(false)} />
         </Modal>
       )}
 
       {editando && (
         <Modal title={`Editar: ${editando.nome}`} onClose={() => setEditando(null)} width="max-w-2xl">
-          <ProdutoForm produto={editando} onClose={() => setEditando(null)} />
+          <ProdutoForm produto={editando} sugestoes={sugestoes} onClose={() => setEditando(null)} />
         </Modal>
       )}
 

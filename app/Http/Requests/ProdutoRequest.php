@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Categoria;
 use App\Models\Produto;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,8 +22,21 @@ class ProdutoRequest extends FormRequest
         $soDigitos = fn ($v) => $v === null || $v === '' ? null : preg_replace('/\D/', '', (string) $v);
         $decimal = fn ($v) => $v === null || $v === '' ? null : str_replace(',', '.', (string) $v);
 
+        $codigo = strtoupper(trim((string) $this->codigo));
+        $categoria = $this->categoria;
+
+        // Categoria padrão: grava com o nome oficial e, no cadastro com código vazio, gera o próximo (OLE-008).
+        // Gerar aqui no servidor evita que dois cadastros ao mesmo tempo peguem o mesmo número da tela.
+        if ($padrao = Categoria::produtoPorNome($categoria)) {
+            $categoria = $padrao->nome;
+            if ($codigo === '' && ! $this->route('produto') && $padrao->prefixo) {
+                $codigo = Categoria::proximoCodigo($padrao->prefixo);
+            }
+        }
+
         $this->merge([
-            'codigo' => strtoupper(trim((string) $this->codigo)),
+            'codigo' => $codigo,
+            'categoria' => $categoria === null ? null : (trim((string) $categoria) ?: null),
             'ncm' => $soDigitos($this->ncm),
             'cfop' => $soDigitos($this->cfop),
             'codigo_barras' => $soDigitos($this->codigo_barras),

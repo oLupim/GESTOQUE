@@ -4,6 +4,7 @@ import { ArrowLeft, Bike, Phone, Trash2, AlertTriangle, Plus } from "lucide-reac
 import AppLayout from "@/layouts/AppLayout";
 import { Button, Input, Select, Card, StatusBadge, Modal } from "@/components/ui";
 import { formatarPlaca, formatarTelefone } from "@/components/Cadastros";
+import { CampoServico, type TipoServico } from "./Index";
 
 type Item = { id: number; produto: string; codigo: string; unidade: string; quantidade: number; preco_unitario: number; subtotal: number };
 type OS = {
@@ -47,7 +48,7 @@ function CancelarOS({ os, onClose }: { os: OS; onClose: () => void }) {
   );
 }
 
-export default function ServicoShow({ os, produtos }: { os: OS; produtos: ProdutoOS[] }) {
+export default function ServicoShow({ os, produtos, tiposServico }: { os: OS; produtos: ProdutoOS[]; tiposServico: TipoServico[] }) {
   const { errors: erroGeral } = usePage<{ errors: Record<string, string> }>().props;
   const [cancelando, setCancelando] = useState(false);
 
@@ -157,7 +158,14 @@ export default function ServicoShow({ os, produtos }: { os: OS; produtos: Produt
                 style={{ borderColor: "#D8D4CC" }}
               />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <Input className="sm:col-span-2" placeholder="Descrição do serviço executado" value={maoObra.data.descricao_servico} onChange={(v) => maoObra.setData("descricao_servico", v)} />
+                <CampoServico
+                  className="sm:col-span-2"
+                  placeholder="Descrição do serviço executado"
+                  value={maoObra.data.descricao_servico}
+                  onChange={(v) => maoObra.setData("descricao_servico", v)}
+                  tipos={os.editavel ? tiposServico : []}
+                  onEscolher={(t) => maoObra.setData("descricao_servico", t.nome)}
+                />
                 <Input placeholder="Valor mão de obra" value={maoObra.data.valor_mao_obra} onChange={(v) => maoObra.setData("valor_mao_obra", v)} />
               </div>
               <Input placeholder="Mecânico" value={maoObra.data.mecanico} onChange={(v) => maoObra.setData("mecanico", v)} />

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
 use App\Models\Produto;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -40,6 +41,8 @@ class ProdutoController extends Controller
             'produtos' => $produtos,
             'categorias' => Produto::whereNotNull('categoria')->distinct()->orderBy('categoria')->pluck('categoria'),
             'marcas' => Produto::whereNotNull('marca')->distinct()->orderBy('marca')->pluck('marca'),
+            // Categorias padrão com prefixo, próximo código e sugestões (unidade, NCM, CFOP) para o cadastro rápido.
+            'categoriasPadrao' => Categoria::deProduto()->orderBy('nome')->get()->map(fn (Categoria $c) => $c->paraFormulario()),
         ]);
     }
         public function store(ProdutoRequest $request, EstoqueService $estoque): RedirectResponse

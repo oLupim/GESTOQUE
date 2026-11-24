@@ -14,6 +14,7 @@ use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\TipoServico;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,6 +44,7 @@ class OrdemServicoController extends Controller
                     'id' => $m->id, 'descricao' => "{$m->marca} {$m->modelo} · {$m->placa}", 'km_atual' => $m->km_atual,
                 ])]),
             'produtos' => $this->produtosDisponiveis(),
+            'tiposServico' => TipoServico::paraSugestao(), // serviços padrão (SRV-001...) para sugerir na descrição
         ]);
     }
 
@@ -75,6 +77,7 @@ class OrdemServicoController extends Controller
                 ]),
             ],
             'produtos' => $this->produtosDisponiveis(),
+            'tiposServico' => TipoServico::paraSugestao(), // serviços padrão (SRV-001...) para sugerir na descrição
         ]);
     }
 
