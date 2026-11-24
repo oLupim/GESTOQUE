@@ -1,7 +1,7 @@
 import { reduzirImagem } from "@/lib/imagem";
 
 /** Uma linha de texto lida na foto: o texto, a altura da letra (em pixels) e a confiança (0–100). */
-export type LinhaLida = { texto: string; altura: number; confianca: number };
+export type LinhaLida = { texto: string; completo: string; altura: number; confianca: number };
 
 /**
  * Lê o texto de uma foto (OCR) no próprio celular, com o Tesseract (código aberto, grátis).
@@ -9,7 +9,10 @@ export type LinhaLida = { texto: string; altura: number; confianca: number };
  * de português (~4 MB); depois fica guardado. O leitor é criado uma vez e reaproveitado.
  */
 type Leitor = { recognize: (imagem: File, opcoes?: object, saida?: object) => Promise<{ data: { blocks: Bloco[] | null } }> };
-type Bloco = { paragraphs: { lines: { text: string; confidence: number; bbox: { y0: number; y1: number } }[] }[] };
+type Bloco = { paragraphs: { lines: { text: string; confidence: number; bbox: { y0: number; y1: number }; words: { text: string; confidence: number }[] }[] }[] };
+
+// Palavra com certeza abaixo disso costuma ser reflexo, desenho ou sujeira lida como letra: fica de fora.
+const CERTEZA_MINIMA_PALAVRA = 40;
 
 let leitor: Promise<Leitor> | null = null;
 
@@ -28,7 +31,13 @@ export async function lerTextoDaFoto(arquivo: File): Promise<LinhaLida[]> {
 
   return (data.blocks ?? [])
     .flatMap((b) => b.paragraphs.flatMap((p) => p.lines))
-    .map((l) => ({ texto: l.text.trim(), altura: Math.round(l.bbox.y1 - l.bbox.y0), confianca: Math.round(l.confidence) }))
-    .filter((l) => l.texto.length > 0)
+    .map((l) => ({
+      // "texto" (só palavras com certeza) vira nome; "completo" serve para achar marca e categoria.
+      texto: l.words.filter((w) => w.confidence >= CERTEZA_MINIMA_PALAVRA).map((w) => w.text).join(" ").trim().slice(0, 200),
+      completo: l.words.map((w) => w.text).join(" ").trim().slice(0, 300),
+      altura: Math.round(l.bbox.y1 - l.bbox.y0),
+      confianca: Math.round(l.confidence),
+    }))
+    .filter((l) => l.completo.length > 0)
     .slice(0, 80);
 }

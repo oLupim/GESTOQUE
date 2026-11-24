@@ -33,8 +33,9 @@ class InterpretarEmbalagemTest extends TestCase
 
         $this->assertSame('Motul', $r['marca']);
         $this->assertSame('Óleos e lubrificantes', $r['categoria']);
-        // Tipo (da palavra "Óleo") + marca + linhas maiores + volume que estava numa linha pequena.
-        $this->assertSame('Óleo Motul 5100 4T 10W-40 1L', $r['nome']);
+        // Opções com o texto como está na embalagem; a primeira (completa) já vai para o campo nome.
+        $this->assertSame(['Óleo MOTUL 5100 4T 10W-40 1L', 'MOTUL 5100 4T', '5100 4T'], $r['opcoes']);
+        $this->assertSame('Óleo MOTUL 5100 4T 10W-40 1L', $r['nome']);
     }
 
     public function test_linhas_reais_devolvidas_pelo_ocr(): void
@@ -49,7 +50,8 @@ class InterpretarEmbalagemTest extends TestCase
 
         $this->assertSame('Motul', $r['marca']);
         $this->assertSame('Óleos e lubrificantes', $r['categoria']);
-        $this->assertSame('Óleo Motul 5100 41 10W-40', $r['nome']); // por isso é só sugestão: a pessoa corrige "41"
+        // Em óleo, "41" (erro de leitura de "4T") é corrigido.
+        $this->assertSame('Óleo MOTUL 5100 4T 10W-40', $r['nome']);
     }
 
     public function test_pastilha_de_freio_com_marca_ja_cadastrada(): void
@@ -65,7 +67,11 @@ class InterpretarEmbalagemTest extends TestCase
 
         $this->assertSame('Cobreq', $r['marca']);
         $this->assertSame('Freios', $r['categoria']);
-        $this->assertSame('Pastilha de Freio Honda CG 160 Titan / Fan Cobreq', $r['nome']);
+        $this->assertSame([
+            'PASTILHA DE FREIO Honda CG 160 Titan / Fan COBREQ',
+            'COBREQ PASTILHA DE FREIO',
+            'PASTILHA DE FREIO',
+        ], $r['opcoes']);
         $this->assertContains('N-1042', $r['palavras']); // linhas lidas viram botões para montar o nome
     }
 
@@ -80,6 +86,43 @@ class InterpretarEmbalagemTest extends TestCase
 
         $this->assertSame('NGK', $r['marca']); // a marca da linha maior ganha
         $this->assertSame('Velas de ignição', $r['categoria']);
+    }
+
+    public function test_corrige_marca_lida_errado_sem_estragar_palavras_parecidas(): void
+    {
+        $r = $this->interpretar([
+            ['M0TUL', 80],          // zero no lugar do O
+            ['MOTOR OIL 4T', 50],   // "MOTOR" não pode virar "MOTUL" (2 letras diferentes)
+        ]);
+        $this->assertSame('Motul', $r['marca']);
+        $this->assertSame('MOTUL MOTOR OIL 4T', $r['opcoes'][1]);
+
+        $r = $this->interpretar([['COBREO', 70], ['PASTILHA DE FREIO', 50]]); // uma letra errada
+        $this->assertSame('Cobreq', $r['marca']);
+        $this->assertSame('COBREQ PASTILHA DE FREIO', $r['opcoes'][1]);
+    }
+
+    public function test_foto_borrada_ainda_acha_marca_e_categoria(): void
+    {
+        // Foto real de celular: a marca veio com pouca certeza e só no "completo" (palavras duvidosas).
+        $r = app(InterpretarEmbalagem::class)->interpretar([
+            ['texto' => '', 'completo' => 'Castrol', 'altura' => 90, 'confianca' => 35],
+            ['texto' => 'POWER1 4T', 'completo' => 'POWER1 4T', 'altura' => 60, 'confianca' => 80],
+            ['texto' => 'LUBRIFICANTES', 'completo' => 'LUBRIFICANTES', 'altura' => 20, 'confianca' => 70], // plural
+        ]);
+
+        $this->assertSame('Castrol', $r['marca']);
+        $this->assertSame('Óleos e lubrificantes', $r['categoria']);
+        $this->assertStringContainsString('POWER1 4T', $r['nome']);
+        $this->assertStringContainsString('Castrol', $r['nome']); // marca entra no nome mesmo vindo de linha borrada
+    }
+
+    public function test_categoria_com_plural_numero_no_lugar_de_letra_e_letra_errada(): void
+    {
+        $this->assertSame('Filtros', $this->interpretar([['FILTROS DE AR', 40]])['categoria']);
+        $this->assertSame('Óleos e lubrificantes', $this->interpretar([['0LEO PARA MOTO', 40]])['categoria']);
+        $this->assertSame('Freios', $this->interpretar([['PASTILNA DIANTEIRA', 40]])['categoria']);
+        $this->assertNull($this->interpretar([['Fabricado no Brasil', 40]])['categoria']); // nada parecido
     }
 
     public function test_texto_sem_pistas_nao_inventa(): void

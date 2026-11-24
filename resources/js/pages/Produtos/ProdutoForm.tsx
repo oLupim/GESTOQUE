@@ -155,10 +155,12 @@ export default function ProdutoForm({ produto, onClose, sugestoes }: { produto?:
    */
   const [leitura, setLeitura] = useState<{ tipo: "ok" | "aviso" | "carregando"; texto: string } | null>(null);
   const [palavras, setPalavras] = useState<string[]>([]);
+  const [opcoesNome, setOpcoesNome] = useState<string[]>([]);
   const lerEmbalagem = async (foto: File) => {
     if (produto) return;
     setLeitura({ tipo: "carregando", texto: "Lendo o texto da embalagem… (na primeira vez demora um pouco mais)" });
     setPalavras([]);
+    setOpcoesNome([]);
     try {
       const { lerTextoDaFoto } = await import("@/lib/ocr");
       const linhas = await lerTextoDaFoto(foto);
@@ -176,16 +178,17 @@ export default function ProdutoForm({ produto, onClose, sugestoes }: { produto?:
         body: JSON.stringify({ linhas }),
       });
       if (!r.ok) throw new Error(String(r.status));
-      const s: { nome: string | null; marca: string | null; categoria: string | null; palavras: string[] } = await r.json();
+      const s: { nome: string | null; opcoes: string[]; marca: string | null; categoria: string | null; palavras: string[] } = await r.json();
 
       setData((d) => {
         const novo = { ...d, nome: d.nome || s.nome || "", marca: d.marca || s.marca || "" };
         return s.categoria && !d.categoria ? comCategoria(novo, s.categoria) : novo;
       });
       setPalavras(s.palavras);
+      setOpcoesNome(s.opcoes);
       const achou = [s.nome && "nome", s.marca && "marca", s.categoria && "categoria"].filter(Boolean);
       setLeitura(achou.length
-        ? { tipo: "ok", texto: `Preenchido pela embalagem: ${achou.join(", ")}. Confira antes de salvar.` }
+        ? { tipo: "ok", texto: `Preenchido pela embalagem: ${achou.join(", ")}. Confira antes de salvar${s.opcoes.length > 1 ? " ou escolha outro nome abaixo" : ""}.` }
         : { tipo: "aviso", texto: "Li o texto, mas não reconheci nome, marca nem categoria. Use as palavras abaixo ou preencha à mão." });
     } catch {
       setLeitura({ tipo: "aviso", texto: "Não consegui ler o texto da embalagem agora. Preencha os dados à mão." });
@@ -223,11 +226,37 @@ export default function ProdutoForm({ produto, onClose, sugestoes }: { produto?:
             {leitura.texto}
           </p>
         )}
+        {/* Nomes possíveis (texto como está na embalagem): tocar troca o nome. */}
+        {opcoesNome.length > 1 && (
+          <div className="mt-2">
+            <div className="text-gray-text text-xs mb-1.5">Qual é o nome? Toque no certo:</div>
+            <div className="space-y-1.5">
+              {opcoesNome.map((o) => {
+                const escolhido = data.nome === o;
+                return (
+                  <button
+                    key={o}
+                    type="button"
+                    onClick={() => setData("nome", o)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 rounded-md border text-left text-sm transition-fast"
+                    style={{ borderColor: escolhido ? "#C9281F" : "#D8D4CC", background: escolhido ? "rgba(201,40,31,0.05)" : "#fff" }}
+                  >
+                    <span
+                      className="w-4 h-4 rounded-full border-2 flex-shrink-0"
+                      style={{ borderColor: escolhido ? "#C9281F" : "#D8D4CC", boxShadow: escolhido ? "inset 0 0 0 3px #fff" : undefined, background: escolhido ? "#C9281F" : "#fff" }}
+                    />
+                    <span className="text-charcoal min-w-0 break-words">{o}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         {/* Linhas lidas na embalagem: tocar junta ao nome. */}
         {palavras.length > 0 && (
           <div className="mt-2">
             <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="text-gray-text text-xs">Palavras da embalagem (toque para pôr no nome):</span>
+              <span className="text-gray-text text-xs">Ou monte o nome com as palavras lidas:</span>
               {data.nome && (
                 <button type="button" onClick={() => setData("nome", "")} className="text-xs text-red font-medium flex-shrink-0">Limpar nome</button>
               )}

@@ -117,7 +117,8 @@ class ProdutoController extends Controller
     {
         $dados = $request->validate([
             'linhas' => ['required', 'array', 'max:80'],
-            'linhas.*.texto' => ['required', 'string', 'max:200'],
+            'linhas.*.texto' => ['present', 'nullable', 'string', 'max:200'],
+            'linhas.*.completo' => ['nullable', 'string', 'max:300'], // a linha com as palavras de pouca certeza também
             'linhas.*.altura' => ['nullable', 'numeric'],
             'linhas.*.confianca' => ['nullable', 'numeric'],
         ]);
