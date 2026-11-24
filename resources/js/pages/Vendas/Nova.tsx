@@ -3,6 +3,7 @@ import { Link, useForm, usePage } from "@inertiajs/react";
 import { Search, Plus, Minus, Trash2, ChevronRight, CheckCircle, AlertTriangle } from "lucide-react";
 import AppLayout from "@/layouts/AppLayout";
 import { Button, Input, Card } from "@/components/ui";
+import LeitorCodigoBarras from "@/components/LeitorCodigoBarras";
 
 type Produto = {
   id: number; nome: string; codigo: string; codigo_barras: string | null; unidade: string;
@@ -78,6 +79,20 @@ export default function NovaVenda({ produtos, formas }: Props) {
       .filter((i) => i.quantidade > 0));
   const remover = (id: number) => setData("itens", data.itens.filter((i) => i.produto_id !== id));
 
+  // Código lido pela câmera: produto achado vai direto para o carrinho.
+  const [avisoLeitura, setAvisoLeitura] = useState<string | null>(null);
+  const lerCodigo = (codigo: string) => {
+    const p = produtos.find((x) => x.codigo_barras === codigo);
+    if (!p) {
+      setAvisoLeitura(`Nenhum produto com o código ${codigo}. Cadastre em Produtos ou busque pelo nome.`);
+    } else if (p.saldo <= 0) {
+      setAvisoLeitura(`${p.nome} está sem estoque.`);
+    } else {
+      setAvisoLeitura(null);
+      adicionar(p);
+    }
+  };
+
   // Enter na busca (ou leitor de código de barras) adiciona o primeiro resultado.
   const enterNaBusca = (e: FormEvent) => {
     e.preventDefault();
@@ -112,9 +127,12 @@ export default function NovaVenda({ produtos, formas }: Props) {
         {/* Produtos */}
         <div className="flex-1 min-w-0">
           <Card className="p-4">
-            <form onSubmit={enterNaBusca} className="mb-4">
-              <Input placeholder="Buscar produto, código ou ler código de barras e apertar Enter..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+            <form onSubmit={enterNaBusca} className="mb-4 flex gap-2 items-start">
+              <Input className="flex-1 min-w-0" placeholder="Buscar produto, código ou ler código de barras e apertar Enter..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+              {/* Celular: lê o código pela câmera ou foto e já coloca no carrinho. */}
+              <LeitorCodigoBarras onLido={lerCodigo} />
             </form>
+            {avisoLeitura && <p className="text-xs -mt-2 mb-3" style={{ color: "#D4610D" }}>{avisoLeitura}</p>}
             <div className="space-y-2">
               {resultados.map((p) => {
                 const noCarrinho = data.itens.find((i) => i.produto_id === p.id);

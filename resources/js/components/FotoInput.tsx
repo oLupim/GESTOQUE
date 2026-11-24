@@ -8,6 +8,74 @@ import { reduzirImagem } from "@/lib/imagem";
  * - "Galeria": escolhe uma foto já salva.
  * A foto é reduzida no próprio navegador antes de enviar.
  */
+/**
+ * Quadrado "Foto do produto" (a que aparece no catálogo), para ficar ao lado do "Escanear código".
+ * Sem `capture`: no iPhone, tocar abre o menu do sistema com "Tirar foto" e "Fototeca".
+ */
+export function FotoQuadrado({ fotoAtual, onChange, onRemover, erro, maxLado = 1024 }: {
+  fotoAtual?: string | null;
+  onChange: (arquivo: File | null) => void;
+  onRemover?: () => void;
+  erro?: string;
+  maxLado?: number;
+}) {
+  const [previa, setPrevia] = useState<string | null>(null);
+  const [preparando, setPreparando] = useState(false);
+  const [chave, setChave] = useState(0);
+
+  useEffect(() => () => { if (previa) URL.revokeObjectURL(previa); }, [previa]);
+
+  const escolher = async (arquivo: File | undefined) => {
+    if (!arquivo) return;
+    setPreparando(true);
+    try {
+      const reduzida = await reduzirImagem(arquivo, { maxLado });
+      setPrevia(URL.createObjectURL(reduzida));
+      onChange(reduzida);
+    } finally {
+      setPreparando(false);
+      setChave((c) => c + 1);
+    }
+  };
+
+  const limpar = () => {
+    setPrevia(null);
+    onChange(null);
+    onRemover?.();
+  };
+
+  const mostrar = previa ?? fotoAtual ?? null;
+
+  return (
+    <div>
+      <label
+        className={`relative w-full aspect-square sm:aspect-auto sm:h-36 flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg border-2 border-dashed bg-white hover:bg-cream transition-fast text-center cursor-pointer overflow-hidden ${preparando ? "opacity-50 pointer-events-none" : ""}`}
+        style={{ borderColor: mostrar ? "#1A7C4E" : "#D8D4CC" }}
+      >
+        {mostrar ? (
+          <>
+            <img src={mostrar} alt="Foto do produto" className="absolute inset-0 w-full h-full object-cover" />
+            <span className="absolute bottom-0 inset-x-0 py-1.5 bg-black/60 text-white text-xs font-medium">Trocar foto do produto</span>
+          </>
+        ) : (
+          <>
+            <Camera size={30} style={{ color: "#C9281F" }} />
+            <span className="text-charcoal text-sm font-semibold leading-tight">{preparando ? "Preparando…" : "Foto do produto"}</span>
+            <span className="text-gray-text text-xs leading-tight">Aparece no catálogo</span>
+          </>
+        )}
+        <input key={chave} type="file" accept="image/*" className="hidden" onChange={(e) => escolher(e.target.files?.[0])} />
+      </label>
+      {mostrar && !preparando && (
+        <button type="button" onClick={limpar} className="inline-flex items-center gap-1.5 text-xs text-gray-text hover:text-red mt-1.5">
+          <Trash2 size={12} /> Remover foto
+        </button>
+      )}
+      {erro && <p className="text-red text-xs mt-1">{erro}</p>}
+    </div>
+  );
+}
+
 export default function FotoInput({
   fotoAtual,
   onChange,
