@@ -66,7 +66,10 @@ class IconeTest extends TestCase
         $this->get('/login')->assertOk()
             ->assertSee("/icone/180.png?v={$versao}", false)
             ->assertSee('rel="manifest"', false)
-            ->assertSee('<meta name="apple-mobile-web-app-title" content="Gestoque">', false);
+            ->assertSee('<meta name="apple-mobile-web-app-title" content="Gestoque">', false)
+            // Vigia contra tela branca: mostra o motivo e o botão de tentar de novo.
+            ->assertSee('O sistema não abriu', false)
+            ->assertSee('location.reload()', false);
 
         $manifesto = json_decode(file_get_contents(public_path('manifest.webmanifest')), true);
         $this->assertSame('Gestoque', $manifesto['short_name']);
