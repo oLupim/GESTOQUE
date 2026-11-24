@@ -12,10 +12,12 @@ import { reduzirImagem } from "@/lib/imagem";
  * Quadrado "Foto do produto" (a que aparece no catálogo), para ficar ao lado do "Escanear código".
  * Sem `capture`: no iPhone, tocar abre o menu do sistema com "Tirar foto" e "Fototeca".
  */
-export function FotoQuadrado({ fotoAtual, onChange, onRemover, erro, maxLado = 1024 }: {
+export function FotoQuadrado({ fotoAtual, onChange, onRemover, onOriginal, erro, maxLado = 1024 }: {
   fotoAtual?: string | null;
   onChange: (arquivo: File | null) => void;
   onRemover?: () => void;
+  /** Recebe a foto original (sem reduzir), ex.: para ler o texto da embalagem. */
+  onOriginal?: (arquivo: File) => void;
   erro?: string;
   maxLado?: number;
 }) {
@@ -27,6 +29,7 @@ export function FotoQuadrado({ fotoAtual, onChange, onRemover, erro, maxLado = 1
 
   const escolher = async (arquivo: File | undefined) => {
     if (!arquivo) return;
+    onOriginal?.(arquivo);
     setPreparando(true);
     try {
       const reduzida = await reduzirImagem(arquivo, { maxLado });

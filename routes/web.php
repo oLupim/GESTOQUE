@@ -41,6 +41,8 @@ Route::get('/icone/{tamanho}.png', [IconeController::class, 'show'])->whereNumbe
         Route::get('/produtos', [ProdutoController::class, 'index'])->name('produtos.index');
 
         Route::post('/produtos', [ProdutoController::class, 'store'])->name('produtos.store');
+        // Texto lido na foto da embalagem (no celular) → sugestões de nome, marca e categoria.
+        Route::post('/produtos/interpretar-embalagem', [ProdutoController::class, 'interpretarEmbalagem'])->middleware('throttle:30,1')->name('produtos.embalagem');
         // POST (e não PUT) porque o PHP não lê arquivo enviado por PUT.
         Route::post('/produtos/{produto}/foto', [ProdutoController::class, 'foto'])->name('produtos.foto');
         Route::put('/produtos/{produto}', [ProdutoController::class, 'update'])->name('produtos.update');

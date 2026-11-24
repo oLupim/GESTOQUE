@@ -148,6 +148,51 @@ export default function ProdutoForm({ produto, onClose, sugestoes }: { produto?:
     : [];
   const categoriaAtual = sugestoes.categoriasPadrao.find((c) => igual(c.nome, data.categoria));
 
+  /**
+   * Foto do produto NOVO: lê o texto da embalagem no celular (grátis, a foto não sai do aparelho),
+   * o servidor sugere nome, marca e categoria, e o formulário preenche só os campos vazios.
+   * As linhas lidas viram botões para completar o nome com toques.
+   */
+  const [leitura, setLeitura] = useState<{ tipo: "ok" | "aviso" | "carregando"; texto: string } | null>(null);
+  const [palavras, setPalavras] = useState<string[]>([]);
+  const lerEmbalagem = async (foto: File) => {
+    if (produto) return;
+    setLeitura({ tipo: "carregando", texto: "Lendo o texto da embalagem… (na primeira vez demora um pouco mais)" });
+    setPalavras([]);
+    try {
+      const { lerTextoDaFoto } = await import("@/lib/ocr");
+      const linhas = await lerTextoDaFoto(foto);
+      if (linhas.length === 0) {
+        setLeitura({ tipo: "aviso", texto: "Não encontrei texto na foto. Preencha os dados à mão." });
+        return;
+      }
+
+      // POST do Laravel precisa do token de segurança (CSRF), que fica no cookie XSRF-TOKEN.
+      const xsrf = decodeURIComponent(document.cookie.split("; ").find((c) => c.startsWith("XSRF-TOKEN="))?.split("=")[1] ?? "");
+      const r = await fetch("/produtos/interpretar-embalagem", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", Accept: "application/json", "X-XSRF-TOKEN": xsrf },
+        body: JSON.stringify({ linhas }),
+      });
+      if (!r.ok) throw new Error(String(r.status));
+      const s: { nome: string | null; marca: string | null; categoria: string | null; palavras: string[] } = await r.json();
+
+      setData((d) => {
+        const novo = { ...d, nome: d.nome || s.nome || "", marca: d.marca || s.marca || "" };
+        return s.categoria && !d.categoria ? comCategoria(novo, s.categoria) : novo;
+      });
+      setPalavras(s.palavras);
+      const achou = [s.nome && "nome", s.marca && "marca", s.categoria && "categoria"].filter(Boolean);
+      setLeitura(achou.length
+        ? { tipo: "ok", texto: `Preenchido pela embalagem: ${achou.join(", ")}. Confira antes de salvar.` }
+        : { tipo: "aviso", texto: "Li o texto, mas não reconheci nome, marca nem categoria. Use as palavras abaixo ou preencha à mão." });
+    } catch {
+      setLeitura({ tipo: "aviso", texto: "Não consegui ler o texto da embalagem agora. Preencha os dados à mão." });
+    }
+  };
+  const juntarAoNome = (palavra: string) => setData((d) => ({ ...d, nome: `${d.nome} ${palavra}`.trim().slice(0, 120) }));
+
   // Outro produto com o mesmo código de barras (o servidor também bloqueia, mas aqui avisa antes de preencher tudo).
   const duplicadoDe = (codigo: string) =>
     codigo ? sugestoes.produtos.find((p) => p.codigo_barras === normalizarCodigo(codigo) && p.id !== produto?.id) : undefined;
@@ -168,10 +213,40 @@ export default function ProdutoForm({ produto, onClose, sugestoes }: { produto?:
             fotoAtual={data.remover_foto ? null : produto?.foto_url}
             onChange={(f) => setData((d) => ({ ...d, foto: f, remover_foto: false }))}
             onRemover={produto ? () => setData((d) => ({ ...d, foto: null, remover_foto: true })) : undefined}
+            onOriginal={lerEmbalagem}
             erro={errors.foto}
           />
         </div>
         {avisoEan}
+        {leitura && (
+          <p className="text-xs mt-1.5" style={{ color: leitura.tipo === "ok" ? "#1A7C4E" : leitura.tipo === "aviso" ? "#D4610D" : "#777A78" }}>
+            {leitura.texto}
+          </p>
+        )}
+        {/* Linhas lidas na embalagem: tocar junta ao nome. */}
+        {palavras.length > 0 && (
+          <div className="mt-2">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="text-gray-text text-xs">Palavras da embalagem (toque para pôr no nome):</span>
+              {data.nome && (
+                <button type="button" onClick={() => setData("nome", "")} className="text-xs text-red font-medium flex-shrink-0">Limpar nome</button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {palavras.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => juntarAoNome(p)}
+                  className="px-2.5 py-1.5 rounded-md border bg-white text-charcoal text-xs hover:bg-cream"
+                  style={{ borderColor: "#D8D4CC" }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -9,6 +9,8 @@ use Inertia\Response;
 use App\Enums\TipoMovimentacao;
 use App\Http\Requests\ProdutoRequest;
 use App\Services\EstoqueService;
+use App\Services\InterpretarEmbalagem;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -108,6 +110,19 @@ class ProdutoController extends Controller
         }
 
         return back()->with('success', "Produto \"{$produto->nome}\" atualizado.");
+    }
+
+    /** Recebe o texto lido na foto da embalagem (OCR no celular) e devolve sugestões de nome, marca e categoria. */
+    public function interpretarEmbalagem(Request $request, InterpretarEmbalagem $interpretar): JsonResponse
+    {
+        $dados = $request->validate([
+            'linhas' => ['required', 'array', 'max:80'],
+            'linhas.*.texto' => ['required', 'string', 'max:200'],
+            'linhas.*.altura' => ['nullable', 'numeric'],
+            'linhas.*.confianca' => ['nullable', 'numeric'],
+        ]);
+
+        return response()->json($interpretar->interpretar($dados['linhas']));
     }
 
     /** Coloca, troca ou remove a foto de um produto já cadastrado. */
