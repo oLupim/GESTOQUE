@@ -205,15 +205,16 @@ export function StatCard({
     success: "#1A7C4E",
   };
   return (
-    <Card className={`p-5 ${onClick ? "cursor-pointer hover:shadow-sm transition-fast" : ""}`} onClick={onClick}>
-      <div className="flex items-start justify-between">
-        <div>
+    <Card className={`p-4 sm:p-5 ${onClick ? "cursor-pointer hover:shadow-sm transition-fast" : ""}`} onClick={onClick}>
+      <div className="flex items-start justify-between gap-2">
+        {/* min-w-0 + fonte menor no celular: valores como "R$ 12.345" cabem com 2 cartões por linha. */}
+        <div className="min-w-0">
           <div className="text-gray-text text-xs font-medium mb-2 uppercase tracking-wide" style={{ fontFamily: "var(--font-sans)", letterSpacing: "0.07em", fontSize: 11 }}>
             {label}
           </div>
           <div
-            className="text-charcoal leading-none"
-            style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 28 }}
+            className="text-charcoal leading-none text-[22px] sm:text-[28px] break-words"
+            style={{ fontFamily: "var(--font-condensed)", fontWeight: 700 }}
           >
             {value}
           </div>
@@ -233,7 +234,7 @@ export function StatCard({
           )}
         </div>
         {Icon && (
-          <div className={`w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0 ${iconBg[variant]}`}>
+          <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-md flex items-center justify-center flex-shrink-0 ${iconBg[variant]}`}>
             <Icon size={18} style={{ color: iconColor[variant] }} />
           </div>
         )}
@@ -287,12 +288,13 @@ export function Tabs({
   onChange: (id: string) => void;
 }) {
   return (
-    <div className="flex gap-0 mb-5" style={{ borderBottom: "1px solid #E5E2DA" }}>
+    // overflow-x-auto: no celular, se as abas não couberem, rolam para o lado em vez de estourar a tela.
+    <div className="flex gap-0 mb-5 overflow-x-auto" style={{ borderBottom: "1px solid #E5E2DA" }}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
-          className={`px-4 py-2.5 text-sm font-medium transition-fast relative flex items-center gap-2 ${
+          className={`px-3 sm:px-4 py-2.5 text-sm font-medium transition-fast relative flex items-center gap-2 whitespace-nowrap flex-shrink-0 ${
             active === tab.id
               ? "text-red border-b-2 border-red"
               : "text-gray-text hover:text-charcoal"
@@ -316,17 +318,18 @@ export function Tabs({
 
 export function Modal({ title, onClose, children, width = "max-w-lg" }: { title: string; onClose: () => void; children: ReactNode; width?: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className={`bg-white rounded-xl shadow-2xl w-full ${width} max-h-[90vh] overflow-y-auto`} style={{ border: "1px solid #E5E2DA" }}>
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid #F0EDE5" }}>
-          <h2 className="text-charcoal font-semibold" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 18 }}>
+    // dvh = altura visível de verdade no celular (descontando a barra do Safari).
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50">
+      <div className={`bg-white rounded-xl shadow-2xl w-full ${width} max-h-[90dvh] overflow-y-auto`} style={{ border: "1px solid #E5E2DA" }}>
+        <div className="sticky top-0 z-10 bg-white flex items-center justify-between gap-3 px-4 sm:px-6 py-4" style={{ borderBottom: "1px solid #F0EDE5" }}>
+          <h2 className="text-charcoal font-semibold min-w-0 truncate" style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 18 }}>
             {title}
           </h2>
-          <button onClick={onClose} className="text-gray-text hover:text-charcoal transition-fast">
-            <span className="text-xl leading-none">×</span>
+          <button onClick={onClose} className="text-gray-text hover:text-charcoal transition-fast w-8 h-8 -mr-2 flex items-center justify-center flex-shrink-0" aria-label="Fechar">
+            <span className="text-2xl leading-none">×</span>
           </button>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-4 sm:px-6 py-5">{children}</div>
       </div>
     </div>
   );

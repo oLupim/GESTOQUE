@@ -94,16 +94,17 @@ export default function ProdutosIndex({ produtos, categorias, marcas }: Props) {
       </PageHeader>
 
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <Input className="w-72" placeholder="Buscar produto ou código..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
-        <Select value={categoria} onChange={setCategoria}>
+        {/* No celular: busca na linha inteira e filtros dividindo o espaço. */}
+        <Input className="w-full sm:w-72" placeholder="Buscar produto ou código..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+        <Select value={categoria} onChange={setCategoria} className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0">
           <option value="">Todas as categorias</option>
           {categorias.map((c) => <option key={c} value={c}>{c}</option>)}
         </Select>
-        <Select value={marca} onChange={setMarca}>
+        <Select value={marca} onChange={setMarca} className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0">
           <option value="">Todas as marcas</option>
           {marcas.map((m) => <option key={m} value={m}>{m}</option>)}
         </Select>
-        <Select value={situacao} onChange={setSituacao}>
+        <Select value={situacao} onChange={setSituacao} className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0">
           <option value="">Todos os status</option>
           {["Normal", "Baixo", "Crítico", "Sem estoque"].map((s) => <option key={s} value={s}>{s}</option>)}
         </Select>

@@ -88,6 +88,7 @@ export default function NovaVenda({ produtos, formas }: Props) {
   const subtotal = data.itens.reduce((s, i) => s + porId(i.produto_id).preco_venda * i.quantidade, 0);
   const desconto = parseFloat(data.desconto.replace(",", ".")) || 0;
   const total = Math.max(0, subtotal - desconto);
+  const unidades = data.itens.reduce((s, i) => s + i.quantidade, 0);
 
   const finalizar = () => post("/vendas", { preserveScroll: true });
   const novaVenda = () => { reset(); clearErrors(); setConcluida(null); };
@@ -105,7 +106,9 @@ export default function NovaVenda({ produtos, formas }: Props) {
         <p className="text-gray-text" style={{ fontSize: 13 }}>Venda de balcão · Consumidor final</p>
       </div>
 
-      <div className="flex gap-5 items-start">
+      {/* No celular (abaixo de lg) o carrinho vai para baixo dos produtos, em vez de dividir a largura e cobrir a lista.
+          pb-24: espaço para a barra fixa do rodapé não tapar o botão de finalizar. */}
+      <div className={`flex flex-col lg:flex-row gap-5 lg:items-start ${data.itens.length > 0 ? "pb-24 lg:pb-0" : ""}`}>
         {/* Produtos */}
         <div className="flex-1 min-w-0">
           <Card className="p-4">
@@ -149,8 +152,8 @@ export default function NovaVenda({ produtos, formas }: Props) {
         </div>
 
         {/* Carrinho */}
-        <div className="w-80 flex-shrink-0">
-          <Card className="sticky top-20">
+        <div id="carrinho" className="w-full lg:w-80 flex-shrink-0 scroll-mt-20">
+          <Card className="lg:sticky lg:top-20">
             <div className="px-5 py-4" style={{ background: "#171918", borderRadius: "8px 8px 0 0" }}>
               <div className="text-white font-bold" style={{ fontFamily: "var(--font-condensed)", fontSize: 16, letterSpacing: "0.04em" }}>CARRINHO</div>
               <div style={{ color: "#777A78", fontSize: 12 }}>{data.itens.length} {data.itens.length === 1 ? "item" : "itens"}</div>
@@ -168,13 +171,14 @@ export default function NovaVenda({ produtos, formas }: Props) {
                         <div className="text-charcoal font-medium" style={{ fontSize: 13 }}>{p.nome}</div>
                         <div className="text-gray-text" style={{ fontSize: 12, fontFamily: "var(--font-mono)" }}>{brl(p.preco_venda)} / {p.unidade.toLowerCase()}</div>
                       </div>
+                      {/* Botões maiores no celular (8 = 32px) para acertar com o dedo. */}
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <button onClick={() => alterarQtd(p.id, -1)} className="w-6 h-6 rounded flex items-center justify-center text-gray-text hover:bg-cream" style={{ border: "1px solid #E5E2DA" }}><Minus size={10} /></button>
+                        <button onClick={() => alterarQtd(p.id, -1)} className="w-8 h-8 lg:w-6 lg:h-6 rounded flex items-center justify-center text-gray-text hover:bg-cream" style={{ border: "1px solid #E5E2DA" }}><Minus size={12} /></button>
                         <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, minWidth: 20, textAlign: "center" }}>{item.quantidade}</span>
-                        <button onClick={() => alterarQtd(p.id, 1)} disabled={item.quantidade >= p.saldo} className="w-6 h-6 rounded flex items-center justify-center text-gray-text hover:bg-cream disabled:opacity-40" style={{ border: "1px solid #E5E2DA" }}><Plus size={10} /></button>
+                        <button onClick={() => alterarQtd(p.id, 1)} disabled={item.quantidade >= p.saldo} className="w-8 h-8 lg:w-6 lg:h-6 rounded flex items-center justify-center text-gray-text hover:bg-cream disabled:opacity-40" style={{ border: "1px solid #E5E2DA" }}><Plus size={12} /></button>
                       </div>
-                      <div className="text-right min-w-[64px]" style={{ fontFamily: "var(--font-condensed)", fontWeight: 600, fontSize: 14 }}>{brl(p.preco_venda * item.quantidade)}</div>
-                      <button onClick={() => remover(p.id)} className="text-gray-text hover:text-red mt-0.5"><Trash2 size={12} /></button>
+                      <div className="text-right min-w-[64px] whitespace-nowrap self-center lg:self-auto" style={{ fontFamily: "var(--font-condensed)", fontWeight: 600, fontSize: 14 }}>{brl(p.preco_venda * item.quantidade)}</div>
+                      <button onClick={() => remover(p.id)} className="text-gray-text hover:text-red p-2 -m-1 lg:p-0 lg:m-0 lg:mt-0.5" aria-label="Remover"><Trash2 size={14} /></button>
                     </div>
                   );
                 })
@@ -192,7 +196,8 @@ export default function NovaVenda({ produtos, formas }: Props) {
                   placeholder="0,00"
                   value={data.desconto}
                   onChange={(e) => setData("desconto", e.target.value)}
-                  className="w-20 text-right text-sm bg-transparent focus:outline-none border-b"
+                  inputMode="decimal"
+                  className="w-24 lg:w-20 text-right text-sm bg-transparent focus:outline-none border-b py-1 lg:py-0"
                   style={{ fontFamily: "var(--font-mono)", borderColor: "#E5E2DA", color: desconto > 0 ? "#C9281F" : "#777A78" }}
                 />
               </div>
@@ -209,7 +214,7 @@ export default function NovaVenda({ produtos, formas }: Props) {
                   <button
                     key={id}
                     onClick={() => setData("forma_pagamento", id)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium border transition-fast ${
+                    className={`flex items-center gap-2 px-3 py-3 lg:py-2 rounded-md text-sm lg:text-xs font-medium border transition-fast ${
                       data.forma_pagamento === id ? "text-red border-red/40 bg-red/5" : "text-gray-text border-gray-light hover:text-charcoal"
                     }`}
                   >
@@ -238,6 +243,29 @@ export default function NovaVenda({ produtos, formas }: Props) {
           </Card>
         </div>
       </div>
+
+      {/* Só no celular: barra fixa com o total, para não precisar rolar até o carrinho para conferir. */}
+      {data.itens.length > 0 && (
+        <div
+          className="lg:hidden fixed bottom-0 inset-x-0 z-30 flex items-center justify-between gap-3 px-4 pt-3 bg-charcoal"
+          style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+        >
+          <div className="min-w-0">
+            <div style={{ color: "#9A9D9B", fontSize: 12 }}>
+              {unidades.toLocaleString("pt-BR")} {unidades === 1 ? "unidade" : "unidades"} no carrinho
+            </div>
+            <div className="text-white leading-tight" style={{ fontFamily: "var(--font-condensed)", fontWeight: 800, fontSize: 22 }}>{brl(total)}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => document.getElementById("carrinho")?.scrollIntoView({ behavior: "smooth" })}
+            className="flex items-center gap-1 px-4 py-2.5 rounded-lg font-bold text-white bg-red flex-shrink-0"
+            style={{ fontFamily: "var(--font-condensed)", fontSize: 15, letterSpacing: "0.05em" }}
+          >
+            VER CARRINHO <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </AppLayout>
   );
 }

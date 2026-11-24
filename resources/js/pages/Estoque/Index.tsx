@@ -91,7 +91,7 @@ function MovModal({ produtos, tipos, produtoInicial, onClose }: { produtos: Prod
       </div>
 
       {produto && n > 0 && (
-        <div className="rounded-lg p-4 flex items-center justify-between gap-4" style={{ background: "#F9F7F3", border: "1px solid #E5E2DA" }}>
+        <div className="rounded-lg p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-4" style={{ background: "#F9F7F3", border: "1px solid #E5E2DA" }}>
           <div className="text-center">
             <div className="text-xs text-gray-text mb-1">Estoque atual</div>
             <div style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: 24 }}>{qtd(produto.saldo)}</div>
@@ -163,8 +163,8 @@ export default function EstoqueIndex({ produtos, movimentacoes, resumo, tipos }:
 
       {aba === "overview" && (
         <Card>
-          <div className="px-5 py-3.5 flex items-center gap-3" style={{ borderBottom: "1px solid #F0EDE5" }}>
-            <Input className="w-64" placeholder="Buscar produto ou código..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+          <div className="px-4 sm:px-5 py-3.5 flex flex-wrap items-center gap-3" style={{ borderBottom: "1px solid #F0EDE5" }}>
+            <Input className="w-full sm:w-64" placeholder="Buscar produto ou código..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
             <span className="text-gray-text text-sm ml-auto">{filtrados.length} produtos</span>
           </div>
           <Table>

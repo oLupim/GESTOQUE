@@ -76,7 +76,8 @@ export default function VendasIndex({ vendas, resumo }: Props) {
                   {/* No celular: número, data, pagamento e status junto dos produtos. */}
                   <div className="md:hidden text-gray-text text-xs" style={{ fontFamily: "var(--font-mono)" }}>#{v.id} · {v.data}</div>
                   <div className="text-charcoal text-sm">{v.itens} {v.itens === 1 ? "item" : "itens"}</div>
-                  <div className="text-gray-text text-xs truncate" style={{ maxWidth: 320 }}>{v.resumo}</div>
+                  {/* Largura máxima menor no celular: com 320px fixos a tabela passava da tela e rolava para o lado. */}
+                  <div className="text-gray-text text-xs truncate max-w-[45vw] md:max-w-[320px]">{v.resumo}</div>
                   <div className="md:hidden mt-1 flex flex-wrap items-center gap-2">
                     <StatusBadge status={v.status} />
                     <span className="text-gray-text text-xs">{v.forma}</span>
@@ -95,7 +96,7 @@ export default function VendasIndex({ vendas, resumo }: Props) {
                 <Td soDesktop><span className="text-gray-text text-sm">{v.usuario}</span></Td>
                 <Td>
                   {v.status === "Concluída" && (
-                    <button onClick={() => setCancelando(v)} className="text-xs font-medium text-red hover:underline">Cancelar</button>
+                    <button onClick={() => setCancelando(v)} className="text-xs font-medium text-red hover:underline py-2">Cancelar</button>
                   )}
                 </Td>
               </tr>

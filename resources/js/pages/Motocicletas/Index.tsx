@@ -31,8 +31,8 @@ export default function MotocicletasIndex({ motos, clientes }: Props) {
         </div>
       )}
 
-      <div className="flex items-center gap-3 mb-5">
-        <Input className="w-72" placeholder="Buscar por modelo, placa ou proprietário..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <Input className="w-full sm:w-72" placeholder="Buscar por modelo, placa ou proprietário..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
         <span className="text-gray-text text-sm ml-auto">{filtradas.length} motos</span>
       </div>
 

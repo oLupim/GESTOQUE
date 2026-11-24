@@ -108,24 +108,29 @@ export default function ServicoShow({ os, produtos }: { os: OS; produtos: Produt
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <div className="xl:col-span-2 space-y-5">
           {/* Peças */}
-          <Card className="p-5">
+          <Card className="p-4 sm:p-5">
             <Titulo>Peças utilizadas</Titulo>
             {os.itens.length === 0 && <div className="text-gray-text text-sm py-3">Nenhuma peça lançada.</div>}
             {os.itens.map((i) => (
-              <div key={i.id} className="flex items-center gap-3 py-2.5" style={{ borderBottom: "1px solid #F0EDE5" }}>
-                <div className="flex-1">
+              <div key={i.id} className="flex items-center gap-2 sm:gap-3 py-2.5" style={{ borderBottom: "1px solid #F0EDE5" }}>
+                <div className="flex-1 min-w-0">
                   <div className="text-charcoal text-sm font-medium">{i.produto}</div>
-                  <div className="text-gray-text text-xs" style={{ fontFamily: "var(--font-mono)" }}>{i.codigo}</div>
+                  <div className="text-gray-text text-xs" style={{ fontFamily: "var(--font-mono)" }}>
+                    {i.codigo}
+                    {/* No celular, quantidade × preço vai aqui embaixo para sobrar espaço ao nome. */}
+                    <span className="sm:hidden"> · {i.quantidade.toLocaleString("pt-BR")} × {brl(i.preco_unitario)}</span>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-text" style={{ fontFamily: "var(--font-mono)" }}>{i.quantidade.toLocaleString("pt-BR")} × {brl(i.preco_unitario)}</div>
-                <div className="w-24 text-right text-sm" style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{brl(i.subtotal)}</div>
-                {os.editavel && <button onClick={() => removerPeca(i)} className="text-gray-text hover:text-red" title="Remover e devolver ao estoque"><Trash2 size={14} /></button>}
+                <div className="hidden sm:block text-sm text-gray-text whitespace-nowrap" style={{ fontFamily: "var(--font-mono)" }}>{i.quantidade.toLocaleString("pt-BR")} × {brl(i.preco_unitario)}</div>
+                <div className="sm:w-24 text-right text-sm whitespace-nowrap" style={{ fontFamily: "var(--font-mono)", fontWeight: 500 }}>{brl(i.subtotal)}</div>
+                {os.editavel && <button onClick={() => removerPeca(i)} className="text-gray-text hover:text-red p-1.5" title="Remover e devolver ao estoque" aria-label="Remover peça"><Trash2 size={14} /></button>}
               </div>
             ))}
 
             {os.editavel && (
-              <form onSubmit={adicionarPeca} className="flex items-start gap-2 mt-4">
-                <div className="flex-1">
+              // Celular: escolha da peça na linha inteira; quantidade e botão embaixo.
+              <form onSubmit={adicionarPeca} className="flex flex-wrap sm:flex-nowrap items-start gap-2 mt-4">
+                <div className="w-full sm:w-auto sm:flex-1 min-w-0">
                   <Select value={peca.data.produto_id} onChange={(v) => peca.setData("produto_id", v)} className="w-full">
                     <option value="">Adicionar peça do estoque...</option>
                     {produtos.map((p) => <option key={p.id} value={p.id}>{p.nome} — {brl(p.preco_venda)} ({p.saldo.toLocaleString("pt-BR")} {p.unidade.toLowerCase()})</option>)}
@@ -133,13 +138,13 @@ export default function ServicoShow({ os, produtos }: { os: OS; produtos: Produt
                   {(peca.errors.produto_id || peca.errors.quantidade) && <p className="text-red text-xs mt-1">{peca.errors.produto_id ?? peca.errors.quantidade}</p>}
                 </div>
                 <Input className="w-20" value={peca.data.quantidade} onChange={(v) => peca.setData("quantidade", v)} />
-                <Button variant="secondary" type="submit" disabled={peca.processing || !peca.data.produto_id}><Plus size={13} /> Adicionar</Button>
+                <Button variant="secondary" type="submit" className="flex-1 sm:flex-none justify-center" disabled={peca.processing || !peca.data.produto_id}><Plus size={13} /> Adicionar</Button>
               </form>
             )}
           </Card>
 
           {/* Mão de obra */}
-          <Card className="p-5">
+          <Card className="p-4 sm:p-5">
             <Titulo>Serviço e mão de obra</Titulo>
             <form onSubmit={salvarMaoObra} className="space-y-3">
               <textarea
@@ -151,8 +156,8 @@ export default function ServicoShow({ os, produtos }: { os: OS; produtos: Produt
                 className="w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-1 focus:ring-red resize-none disabled:bg-cream/40"
                 style={{ borderColor: "#D8D4CC" }}
               />
-              <div className="grid grid-cols-3 gap-3">
-                <Input className="col-span-2" placeholder="Descrição do serviço executado" value={maoObra.data.descricao_servico} onChange={(v) => maoObra.setData("descricao_servico", v)} />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Input className="sm:col-span-2" placeholder="Descrição do serviço executado" value={maoObra.data.descricao_servico} onChange={(v) => maoObra.setData("descricao_servico", v)} />
                 <Input placeholder="Valor mão de obra" value={maoObra.data.valor_mao_obra} onChange={(v) => maoObra.setData("valor_mao_obra", v)} />
               </div>
               <Input placeholder="Mecânico" value={maoObra.data.mecanico} onChange={(v) => maoObra.setData("mecanico", v)} />

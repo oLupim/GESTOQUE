@@ -26,9 +26,10 @@ function Grafico({ dados }: { dados: Props["grafico"] }) {
   const max = Math.max(...dados.map((d) => d.valor), 1);
 
   return (
-    <div className="flex items-end justify-between gap-2 h-44 px-1 pt-4">
+    <div className="flex items-end justify-between gap-1 sm:gap-2 h-44 px-1 pt-4">
       {dados.map((d, i) => (
-        <div key={d.data} className="flex flex-col items-center gap-1.5 flex-1 h-full justify-end" onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
+        // onClick: no celular não existe "passar o mouse"; tocar na barra mostra o valor.
+        <div key={d.data} className="flex flex-col items-center gap-1.5 flex-1 min-w-0 h-full justify-end" onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onClick={() => setHover(hover === i ? null : i)}>
           <div className="text-white rounded px-2 py-1 whitespace-nowrap" style={{ background: "#171918", fontSize: 11, fontFamily: "var(--font-mono)", visibility: hover === i ? "visible" : "hidden" }}>
             {brl(d.valor, 0)}
           </div>
@@ -85,12 +86,12 @@ export default function Dashboard({ nome, saudacao, cards, grafico, movimentacoe
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
         <Card className="xl:col-span-2 p-5">
-          <div className="flex items-center justify-between mb-2">
-            <div>
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="min-w-0">
               <div className="text-charcoal font-semibold" style={{ fontFamily: "var(--font-display)", fontSize: 14 }}>Vendas — últimos 7 dias</div>
               <div className="text-gray-text" style={{ fontSize: 12 }}>Faturamento diário de vendas de balcão</div>
             </div>
-            <div className="text-charcoal font-bold" style={{ fontFamily: "var(--font-condensed)", fontSize: 20 }}>{brl(totalSemana)}</div>
+            <div className="text-charcoal font-bold whitespace-nowrap" style={{ fontFamily: "var(--font-condensed)", fontSize: 20 }}>{brl(totalSemana)}</div>
           </div>
           <Grafico dados={grafico} />
         </Card>

@@ -33,7 +33,7 @@ function Campo({ label, erro, children }: { label: string; erro?: string; childr
 
 function Cartao({ titulo, descricao, children }: { titulo: string; descricao: string; children: ReactNode }) {
   return (
-    <section className="rounded-lg border border-neutral-200 bg-white p-6">
+    <section className="rounded-lg border border-neutral-200 bg-white p-4 sm:p-6">
       <h2 className="text-lg font-semibold">{titulo}</h2>
       <p className="mb-4 text-sm text-neutral-500">{descricao}</p>
       {children}

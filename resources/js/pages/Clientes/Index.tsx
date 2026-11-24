@@ -95,8 +95,8 @@ export default function ClientesIndex({ clientes }: { clientes: Cliente[] }) {
         <Button variant="primary" onClick={() => setForm("novo")}><Plus size={14} /> Novo cliente</Button>
       </PageHeader>
 
-      <div className="flex items-center gap-3 mb-5">
-        <Input className="w-72" placeholder="Buscar por nome, telefone ou CPF..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <Input className="w-full sm:w-72" placeholder="Buscar por nome, telefone ou CPF..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
         <span className="text-gray-text text-sm ml-auto">{filtrados.length} clientes</span>
       </div>
 

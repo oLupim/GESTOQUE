@@ -68,19 +68,19 @@ export default function AppLayout({ title, children }: { title: string; children
             </div>
           </header>
 
-          <main className="flex-1 p-5 xl:p-7 max-w-screen-2xl w-full mx-auto">{children}</main>
+          <main className="flex-1 p-4 sm:p-5 xl:p-7 max-w-screen-2xl w-full mx-auto">{children}</main>
         </div>
         
                 {aviso && (
           <div
-            className="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl bg-white"
+            className="fixed bottom-5 left-4 right-4 sm:left-auto sm:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl bg-white"
             style={{ border: `1px solid ${aviso.tipo === "success" ? "rgba(26,124,78,0.3)" : "rgba(201,40,31,0.3)"}` }}
           >
             {aviso.tipo === "success"
               ? <CheckCircle size={18} style={{ color: "#1A7C4E" }} />
               : <AlertTriangle size={18} style={{ color: "#C9281F" }} />}
-            <span className="text-charcoal text-sm">{aviso.texto}</span>
-            <button onClick={() => setAviso(null)} className="text-gray-text hover:text-charcoal ml-2">
+            <span className="text-charcoal text-sm flex-1 min-w-0">{aviso.texto}</span>
+            <button onClick={() => setAviso(null)} className="text-gray-text hover:text-charcoal ml-2 flex-shrink-0">
               <X size={14} />
             </button>
           </div>

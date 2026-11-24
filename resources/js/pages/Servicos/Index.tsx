@@ -95,8 +95,8 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
 
       <div className="pt-1" style={{ borderTop: "1px solid #F0EDE5" }}>
         <div className="text-xs font-semibold text-gray-text uppercase mb-3 mt-3" style={{ letterSpacing: "0.07em" }}>Mão de obra</div>
-        <div className="grid grid-cols-3 gap-3">
-          <Input className="col-span-2" placeholder="Descrição do serviço" value={data.descricao_servico} onChange={(v) => setData("descricao_servico", v)} />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Input className="sm:col-span-2" placeholder="Descrição do serviço" value={data.descricao_servico} onChange={(v) => setData("descricao_servico", v)} />
           <Input placeholder="R$ 0,00" value={data.valor_mao_obra} onChange={(v) => setData("valor_mao_obra", v)} />
         </div>
         {errors.valor_mao_obra && <p className="text-red text-xs mt-1">{errors.valor_mao_obra}</p>}
@@ -109,12 +109,12 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
           {resultados.length > 0 && (
             <div className="absolute top-full mt-1 left-0 right-0 bg-white rounded-lg shadow-xl z-10 py-1" style={{ border: "1px solid #E5E2DA" }}>
               {resultados.map((p) => (
-                <button key={p.id} type="button" onClick={() => adicionar(p)} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-cream text-left">
-                  <div>
+                <button key={p.id} type="button" onClick={() => adicionar(p)} className="w-full flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 hover:bg-cream text-left">
+                  <div className="min-w-0">
                     <div className="text-charcoal text-sm font-medium">{p.nome}</div>
                     <div className="text-gray-text text-xs">{p.codigo} · {p.saldo.toLocaleString("pt-BR")} {p.unidade.toLowerCase()} em estoque</div>
                   </div>
-                  <div style={{ fontFamily: "var(--font-condensed)", fontWeight: 600, fontSize: 15 }}>{brl(p.preco_venda)}</div>
+                  <div className="whitespace-nowrap flex-shrink-0" style={{ fontFamily: "var(--font-condensed)", fontWeight: 600, fontSize: 15 }}>{brl(p.preco_venda)}</div>
                 </button>
               ))}
             </div>
@@ -124,8 +124,8 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
         {data.pecas.map((i) => {
           const p = porId(i.produto_id);
           return (
-            <div key={p.id} className="flex items-center gap-3 py-2" style={{ borderBottom: "1px solid #F0EDE5" }}>
-              <div className="flex-1 text-sm text-charcoal">{p.nome}</div>
+            <div key={p.id} className="flex items-center gap-2 sm:gap-3 py-2" style={{ borderBottom: "1px solid #F0EDE5" }}>
+              <div className="flex-1 min-w-0 text-sm text-charcoal">{p.nome}</div>
               <input
                 type="number"
                 min={1}
@@ -138,8 +138,8 @@ function NovoServico({ clientes, produtos, onClose }: { clientes: ClienteOS[]; p
                 className="w-14 text-center border rounded px-1 py-0.5 text-sm"
                 style={{ borderColor: "#D8D4CC", fontFamily: "var(--font-mono)" }}
               />
-              <div className="w-24 text-right text-sm" style={{ fontFamily: "var(--font-mono)" }}>{brl(p.preco_venda * i.quantidade)}</div>
-              <button type="button" onClick={() => setData("pecas", data.pecas.filter((x) => x.produto_id !== p.id))} className="text-gray-text hover:text-red"><Trash2 size={13} /></button>
+              <div className="w-20 sm:w-24 text-right text-sm whitespace-nowrap" style={{ fontFamily: "var(--font-mono)" }}>{brl(p.preco_venda * i.quantidade)}</div>
+              <button type="button" onClick={() => setData("pecas", data.pecas.filter((x) => x.produto_id !== p.id))} className="text-gray-text hover:text-red p-1.5" aria-label="Remover peça"><Trash2 size={14} /></button>
             </div>
           );
         })}
@@ -185,9 +185,9 @@ export default function ServicosIndex({ ordens, contagem, clientes, produtos }: 
         <StatCard label="Finalizados" value={`${contagem.finalizada ?? 0}`} icon={CheckCircle} />
       </div>
 
-      <div className="flex items-center gap-3 mb-5">
-        <Input className="w-64" placeholder="Buscar cliente, moto ou placa..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
-        <Select value={status} onChange={setStatus}>
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <Input className="w-full sm:w-64" placeholder="Buscar cliente, moto ou placa..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+        <Select value={status} onChange={setStatus} className="flex-1 sm:flex-none">
           <option value="">Todos os status</option>
           {["Aberto", "Em andamento", "Aguardando peça", "Finalizado", "Cancelado"].map((s) => <option key={s} value={s}>{s}</option>)}
         </Select>

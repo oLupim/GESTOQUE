@@ -72,7 +72,7 @@ function NovaEntrada({ produtos, onClose }: { produtos: Produto[]; onClose: () =
       </div>
 
       <div className="pt-2" style={{ borderTop: "1px solid #F0EDE5" }}>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between gap-2 mb-3">
           <div className="text-xs font-semibold text-gray-text uppercase" style={{ letterSpacing: "0.07em" }}>Produtos recebidos</div>
           <Button variant="secondary" size="sm" onClick={adicionar}><Plus size={11} /> Adicionar item</Button>
         </div>
@@ -82,8 +82,13 @@ function NovaEntrada({ produtos, onClose }: { produtos: Produto[]; onClose: () =
           {data.itens.map((it, i) => {
             const p = produtos.find((p) => p.id === Number(it.produto_id));
             return (
-              <div key={i} className="grid gap-2 items-start" style={{ gridTemplateColumns: "1fr 90px 110px 100px 32px" }}>
-                <div>
+              // Celular: produto numa linha, quantidade/custo/total/lixeira na de baixo (as colunas fixas não cabiam).
+              <div
+                key={i}
+                className={`grid gap-2 items-start grid-cols-[1fr_1fr_auto_32px] sm:grid-cols-[1fr_90px_110px_100px_32px] ${i > 0 ? "pt-3 sm:pt-0 border-t sm:border-t-0" : ""}`}
+                style={{ borderColor: "#F0EDE5" }}
+              >
+                <div className="col-span-4 sm:col-span-1">
                   <Select value={it.produto_id} onChange={(v) => alterarItem(i, "produto_id", v)} className="w-full">
                     <option value="">Selecionar produto...</option>
                     {produtos.map((p) => <option key={p.id} value={p.id}>{p.nome} ({p.codigo})</option>)}
@@ -99,7 +104,7 @@ function NovaEntrada({ produtos, onClose }: { produtos: Produto[]; onClose: () =
                   <Input placeholder="Custo un." value={it.custo_unitario} onChange={(v) => alterarItem(i, "custo_unitario", v)} />
                   <Erro msg={erro[`itens.${i}.custo_unitario`]} />
                 </div>
-                <div className="py-2 text-right text-sm" style={{ fontFamily: "var(--font-mono)" }}>
+                <div className="py-2 text-right text-sm whitespace-nowrap" style={{ fontFamily: "var(--font-mono)" }}>
                   {brl(num(it.quantidade) * num(it.custo_unitario))}
                 </div>
                 <button
@@ -146,8 +151,8 @@ export default function EntradasIndex({ entradas, produtos }: Props) {
         <Button variant="primary" onClick={() => setNova(true)}><Plus size={14} /> Nova entrada</Button>
       </PageHeader>
 
-      <div className="flex items-center gap-3 mb-5">
-        <Input className="w-72" placeholder="Buscar fornecedor, nota ou produto..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <Input className="w-full sm:w-72" placeholder="Buscar fornecedor, nota ou produto..." value={busca} onChange={setBusca} prefix={<Search size={14} />} />
         <span className="text-gray-text text-sm ml-auto">{filtradas.length} entradas</span>
       </div>
 
