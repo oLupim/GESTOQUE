@@ -39,6 +39,16 @@ class CodigoBarrasTest extends TestCase
         $this->assertSame(1, Produto::count());
     }
 
+    public function test_codigo_de_etiqueta_curto_e_com_letras_e_aceito(): void
+    {
+        // Etiqueta de peça (Code 39/128) pode ser curta e ter letras; fica só com letras e números, em maiúsculas.
+        $this->post('/produtos', $this->dados(['codigo_barras' => 'kr-s901']))->assertSessionHasNoErrors();
+        $this->assertSame('KRS901', Produto::firstOrFail()->codigo_barras);
+
+        $this->post('/produtos', $this->dados(['codigo' => 'OLE-002', 'codigo_barras' => '12']))
+            ->assertSessionHasErrors('codigo_barras'); // curto demais (menos de 4)
+    }
+
     public function test_telas_de_produto_e_venda_recebem_o_codigo_de_barras(): void
     {
         $this->withoutVite();

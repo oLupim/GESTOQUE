@@ -3,7 +3,7 @@ import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Button, Input, Select } from "@/components/ui";
 import { FotoQuadrado } from "@/components/FotoInput";
 import Autocompletar, { contem } from "@/components/Autocompletar";
-import LeitorCodigoBarras from "@/components/LeitorCodigoBarras";
+import LeitorCodigoBarras, { normalizarCodigo } from "@/components/LeitorCodigoBarras";
 
 const UNIDADES = ["UN", "PAR", "KIT", "JG", "L", "ML", "KG", "M", "FR", "CX"];
 
@@ -149,9 +149,9 @@ export default function ProdutoForm({ produto, onClose, sugestoes }: { produto?:
   const categoriaAtual = sugestoes.categoriasPadrao.find((c) => igual(c.nome, data.categoria));
 
   // Outro produto com o mesmo código de barras (o servidor também bloqueia, mas aqui avisa antes de preencher tudo).
-  const eanDuplicado = data.codigo_barras
-    ? sugestoes.produtos.find((p) => p.codigo_barras === data.codigo_barras.replace(/\D/g, "") && p.id !== produto?.id)
-    : undefined;
+  const duplicadoDe = (codigo: string) =>
+    codigo ? sugestoes.produtos.find((p) => p.codigo_barras === normalizarCodigo(codigo) && p.id !== produto?.id) : undefined;
+  const eanDuplicado = duplicadoDe(data.codigo_barras);
   const avisoEan = eanDuplicado && (
     <p className="text-xs mt-1" style={{ color: "#D4610D" }}>
       Já cadastrado: {eanDuplicado.nome} ({eanDuplicado.codigo}). Para mudar o estoque dele, use Estoque → Movimentar.
@@ -236,7 +236,7 @@ export default function ProdutoForm({ produto, onClose, sugestoes }: { produto?:
           {codigoAuto && !produto && <p className="text-gray-text text-xs mt-1">Próximo código da categoria. Pode trocar se quiser.</p>}
         </Campo>
         <Campo label="Código de barras" erro={errors.codigo_barras}>
-          <Input placeholder="EAN (ou use Escanear, no topo)" value={data.codigo_barras} onChange={(v) => setData("codigo_barras", v)} />
+          <Input placeholder="EAN ou código da etiqueta (ou use Escanear, no topo)" value={data.codigo_barras} onChange={(v) => setData("codigo_barras", v)} />
         </Campo>
       </div>
 

@@ -9,7 +9,8 @@ import { reduzirImagem } from "@/lib/imagem";
  * A biblioteca (ZXing, código aberto) só é baixada quando a pessoa toca no botão.
  */
 
-// Só os formatos de produto: deixa a leitura mais rápida e evita ler outra coisa.
+// Formatos de produto: os de mercado (EAN/UPC) e os de etiqueta de peça (Code 128/39/93, ITF, Codabar),
+// comuns em autopeças com códigos curtos. QR Code fica de fora para não ler outra coisa.
 async function criarLeitor() {
   const [{ BrowserMultiFormatReader }, { BarcodeFormat, DecodeHintType }] = await Promise.all([
     import("@zxing/browser"),
@@ -17,7 +18,8 @@ async function criarLeitor() {
   ]);
   const dicas = new Map();
   dicas.set(DecodeHintType.POSSIBLE_FORMATS, [
-    BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E, BarcodeFormat.CODE_128,
+    BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E,
+    BarcodeFormat.CODE_128, BarcodeFormat.CODE_39, BarcodeFormat.CODE_93, BarcodeFormat.ITF, BarcodeFormat.CODABAR,
   ]);
   dicas.set(DecodeHintType.TRY_HARDER, true);
   return new BrowserMultiFormatReader(dicas);
@@ -44,7 +46,8 @@ function JanelaLeitura({ onLido, onFechar }: { onLido: (codigo: string) => void;
 
     criarLeitor()
       .then((leitor) => leitor.decodeFromConstraints(
-        { video: { facingMode: "environment" } }, // câmera traseira
+        // Câmera traseira em resolução alta: código pequeno em baixa resolução vira borrão e não lê.
+        { video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } },
         video.current!,
         (resultado, _erro, controles) => {
           if (resultado && ativo) {
@@ -75,8 +78,8 @@ function JanelaLeitura({ onLido, onFechar }: { onLido: (codigo: string) => void;
     setAvisoFoto(null);
     let url: string | null = null;
     try {
-      // Foto do iPhone é enorme: reduz antes, a leitura fica bem mais rápida.
-      const menor = await reduzirImagem(arquivo, { maxLado: 1600, qualidade: 0.92 });
+      // Foto do iPhone é enorme: reduz antes (mas não muito, senão código pequeno perde as barras finas).
+      const menor = await reduzirImagem(arquivo, { maxLado: 2400, qualidade: 0.95 });
       url = URL.createObjectURL(menor);
       const leitor = await criarLeitor();
       aoLer.current((await leitor.decodeFromImageUrl(url)).getText());
@@ -100,7 +103,7 @@ function JanelaLeitura({ onLido, onFechar }: { onLido: (codigo: string) => void;
             {/* Faixa de mira: ajuda a pessoa a enquadrar as barras. */}
             <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 h-24 rounded-md pointer-events-none" style={{ border: "2px solid rgba(255,255,255,0.85)", boxShadow: "0 0 0 9999px rgba(0,0,0,0.35)" }} />
           </div>
-          <p className="text-gray-text text-sm mt-3 mb-4">Aponte para as barras e segure firme. A leitura é automática.</p>
+          <p className="text-gray-text text-sm mt-3 mb-4">Aponte para as barras e segure firme. Código pequeno: afaste um pouco até a imagem ficar nítida. A leitura é automática.</p>
         </>
       )}
 
@@ -117,6 +120,9 @@ function JanelaLeitura({ onLido, onFechar }: { onLido: (codigo: string) => void;
   );
 }
 
+/** Mesma limpeza do servidor: só letras e números, maiúsculas ("789-123 4" → "7891234"). */
+export const normalizarCodigo = (codigo: string) => codigo.replace(/[^0-9A-Za-z]/g, "").toUpperCase();
+
 export default function LeitorCodigoBarras({ onLido, quadrado = false, lido }: {
   /** Recebe só os números lidos. */
   onLido: (codigo: string) => void;
@@ -129,7 +135,8 @@ export default function LeitorCodigoBarras({ onLido, quadrado = false, lido }: {
 
   const aoLer = (codigo: string) => {
     setAberto(false);
-    onLido(codigo.replace(/\D/g, "") || codigo);
+    // Letras e números, em maiúsculas (etiqueta de peça pode ter letras); igual ao que o servidor grava.
+    onLido(normalizarCodigo(codigo));
   };
 
   return (

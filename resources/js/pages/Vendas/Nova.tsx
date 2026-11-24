@@ -3,7 +3,7 @@ import { Link, useForm, usePage } from "@inertiajs/react";
 import { Search, Plus, Minus, Trash2, ChevronRight, CheckCircle, AlertTriangle } from "lucide-react";
 import AppLayout from "@/layouts/AppLayout";
 import { Button, Input, Card } from "@/components/ui";
-import LeitorCodigoBarras from "@/components/LeitorCodigoBarras";
+import LeitorCodigoBarras, { normalizarCodigo } from "@/components/LeitorCodigoBarras";
 
 type Produto = {
   id: number; nome: string; codigo: string; codigo_barras: string | null; unidade: string;
@@ -82,7 +82,8 @@ export default function NovaVenda({ produtos, formas }: Props) {
   // Código lido pela câmera: produto achado vai direto para o carrinho.
   const [avisoLeitura, setAvisoLeitura] = useState<string | null>(null);
   const lerCodigo = (codigo: string) => {
-    const p = produtos.find((x) => x.codigo_barras === codigo);
+    // Acha pelo código de barras ou pelo código interno (etiqueta impressa com OLE-001, por exemplo).
+    const p = produtos.find((x) => x.codigo_barras === codigo) ?? produtos.find((x) => normalizarCodigo(x.codigo) === codigo);
     if (!p) {
       setAvisoLeitura(`Nenhum produto com o código ${codigo}. Cadastre em Produtos ou busque pelo nome.`);
     } else if (p.saldo <= 0) {

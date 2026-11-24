@@ -39,7 +39,8 @@ class ProdutoRequest extends FormRequest
             'categoria' => $categoria === null ? null : (trim((string) $categoria) ?: null),
             'ncm' => $soDigitos($this->ncm),
             'cfop' => $soDigitos($this->cfop),
-            'codigo_barras' => $soDigitos($this->codigo_barras),
+            // Só letras e números, em maiúsculas: "789-1234 567890" → "7891234567890", "abc-12" → "ABC12".
+            'codigo_barras' => blank($this->codigo_barras) ? null : (strtoupper(preg_replace('/[^0-9A-Za-z]/', '', (string) $this->codigo_barras)) ?: null),
             'preco_custo' => $decimal($this->preco_custo),
             'preco_venda' => $decimal($this->preco_venda),
             'estoque_minimo' => $decimal($this->estoque_minimo),
@@ -57,7 +58,8 @@ class ProdutoRequest extends FormRequest
 
         $regras = [
             'codigo' => ['required', 'string', 'max:30', Rule::unique('produtos', 'codigo')->ignore($produto?->id)],
-            'codigo_barras' => ['nullable', 'digits_between:8,14', Rule::unique('produtos', 'codigo_barras')->ignore($produto?->id)],
+            // EAN de mercado (só números) ou etiqueta de peça (Code 39/128: curta e com letras).
+            'codigo_barras' => ['nullable', 'regex:/^[0-9A-Z]{4,30}$/', Rule::unique('produtos', 'codigo_barras')->ignore($produto?->id)],
             'nome' => ['required', 'string', 'max:120'],
             'categoria' => ['nullable', 'string', 'max:60'],
             'marca' => ['nullable', 'string', 'max:60'],
@@ -92,6 +94,7 @@ class ProdutoRequest extends FormRequest
             'digits' => ':Attribute deve ter :digits dígitos.',
             'digits_between' => ':Attribute deve ter entre :min e :max dígitos.',
             'in' => ':Attribute inválida.',
+            'codigo_barras.regex' => 'O código de barras deve ter de 4 a 30 letras ou números.',
             ...Produto::MENSAGENS_FOTO, // mais específicas que as genéricas acima
         ];
     }
